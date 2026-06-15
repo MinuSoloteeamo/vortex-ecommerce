@@ -1,0 +1,312 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: var(--background-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 900px;
+  min-height: 500px;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  transform: translateY(20px) scale(0.95);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  to { transform: translateY(0) scale(1); }
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.formSection {
+  flex: 1;
+  padding: 3rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.imageSection {
+  flex: 1;
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, #000000 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hiệu ứng nền grid mờ phía sau */
+.imageSection::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.3;
+}
+
+.logoText {
+  font-size: 4.5rem;
+  font-family: var(--font-display, sans-serif);
+  font-weight: 900;
+  letter-spacing: 0.3rem;
+  position: relative;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.4));
+  animation: pulseLogo 3s infinite alternate ease-in-out, floatLogo 6s ease-in-out infinite;
+}
+
+/* Hiệu ứng trượt bóng ngang chữ */
+.logoText::after {
+  content: 'VORTEX';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: transparent;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 3s infinite linear;
+  background-size: 200% auto;
+}
+
+@keyframes pulseLogo {
+  0% { filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3)); }
+  100% { filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.8)); }
+}
+
+@keyframes floatLogo {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes shine {
+  to { background-position: 200% center; }
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #ffffff; /* Sáng hơn */
+}
+
+.subtitle {
+  color: #a1a1aa; /* Sáng hơn var(--text-muted) một chút */
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 2.5rem;
+  background: rgba(255, 255, 255, 0.08); /* Nổi bật hơn */
+  border: 1px solid rgba(255, 255, 255, 0.15); /* Đường viền rõ ràng hơn */
+  border-radius: 0.75rem;
+  color: #ffffff;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.12); /* Sáng hơn khi focus */
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+.input::placeholder {
+  color: #71717a; /* Màu placeholder rõ hơn */
+}
+
+.inputIcon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a1a1aa; /* Sáng hơn */
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.submitBtn:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.divider::before { margin-right: 1rem; }
+.divider::after { margin-left: 1rem; }
+
+.socialGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.socialBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.socialBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.toggleView {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.toggleLink {
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  position: relative;
+}
+
+.toggleLink::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.toggleLink:hover::after {
+  height: 2px;
+  background-color: var(--color-primary);
+}
+
+.toggleLink:hover {
+  color: var(--color-primary);
+}
+
+.errorText {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .imageSection {
+    display: none; /* Ẩn ảnh trên mobile cho gọn */
+  }
+  .formSection {
+    padding: 2rem 1.5rem;
+  }
+}

@@ -1,0 +1,3 @@
+.wrapper {
+  will-change: opacity, transform;
+}

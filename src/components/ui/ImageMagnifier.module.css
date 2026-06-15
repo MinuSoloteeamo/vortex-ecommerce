@@ -1,0 +1,46 @@
+.magnifierContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: crosshair;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.emojiFallback {
+  font-size: 8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.magnifierLens {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  /* 2x zoom */
+  background-size: 200%;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  animation: fadeIn 0.2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

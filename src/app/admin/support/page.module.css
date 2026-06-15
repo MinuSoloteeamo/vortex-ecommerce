@@ -1,0 +1,326 @@
+.adminPage {
+  padding: var(--space-xl);
+  min-height: calc(100vh - var(--header-height));
+  display: flex;
+  flex-direction: column;
+  background: rgba(10, 10, 15, 0.4);
+}
+
+.header {
+  margin-bottom: var(--space-xl);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Dashboard Layout */
+.dashboardContainer {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-lg);
+  flex: 1;
+  height: 650px;
+  align-items: stretch;
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sectionTitle {
+  padding: 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-subtle);
+  letter-spacing: 0.03em;
+  color: var(--text-primary);
+}
+
+.sessionList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sessionList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sessionList::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.sessionCard {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  width: 100%;
+}
+
+.sessionCard:hover {
+  background: var(--bg-glass);
+}
+
+.activeCard {
+  background: var(--bg-glass-strong) !important;
+  border-left: 4px solid var(--color-primary);
+}
+
+.pendingCard {
+  background: rgba(239, 68, 68, 0.08);
+  animation: alarmPulse 2.5s infinite;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
+
+.guestName {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.statusBadge.AI {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.statusBadge.PENDING_HUMAN {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  animation: flash 1s infinite alternate;
+}
+
+.statusBadge.HUMAN {
+  background: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
+  border: 1px solid #06b6d4;
+}
+
+.cardSnippet {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.loading, .empty {
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Chat Area Window */
+.chatArea {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatWrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chatHeader {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10, 10, 15, 0.4);
+}
+
+.chatHeader h3 {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.messagesDisplay {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.messagesDisplay::-webkit-scrollbar {
+  width: 4px;
+}
+
+.messagesDisplay::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.messageBlock {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+}
+
+.userBlock {
+  align-self: flex-start;
+}
+
+.staffBlock {
+  align-self: flex-end;
+}
+
+.aiBlock {
+  align-self: flex-start;
+}
+
+.senderLabel {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.staffBlock .senderLabel {
+  text-align: right;
+}
+
+.messageBubble {
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.userBlock .messageBubble {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  border-top-left-radius: 0;
+}
+
+.staffBlock .messageBubble {
+  background: var(--color-primary-dim);
+  border: 1px solid var(--color-primary);
+  color: var(--text-primary);
+  border-top-right-radius: 0;
+}
+
+.aiBlock .messageBubble {
+  background: rgba(168, 85, 247, 0.05);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  color: var(--text-secondary);
+  border-top-left-radius: 0;
+  font-style: italic;
+}
+
+/* Reply Area Input */
+.replyArea {
+  padding: 16px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  gap: 12px;
+  background: rgba(10, 10, 15, 0.4);
+}
+
+.replyInput {
+  flex: 1;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: 0 16px;
+  height: 48px;
+  font-size: var(--font-size-sm);
+  outline: none;
+  transition: all var(--transition-base);
+}
+
+.replyInput:focus:not(:disabled) {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 10px var(--color-primary-dim);
+}
+
+.replyInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* No chat selected */
+.noChatSelected {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  color: var(--text-muted);
+}
+
+.selectPromptIcon {
+  font-size: 5rem;
+  animation: float 4s ease-in-out infinite;
+}
+
+.noChatSelected h3 {
+  font-size: var(--font-size-base);
+  max-width: 300px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Animations */
+@keyframes alarmPulse {
+  0% { box-shadow: inset 0 0 0 rgba(239, 68, 68, 0); }
+  50% { box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.25); }
+  100% { box-shadow: inset 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@keyframes flash {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}

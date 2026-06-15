@@ -1,0 +1,181 @@
+.header {
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.content {
+  display: flex;
+  gap: var(--space-2xl);
+}
+
+.formArea {
+  flex: 1;
+}
+
+.avatarArea {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  border-left: 1px solid var(--border-subtle);
+  padding-left: var(--space-xl);
+}
+
+.avatarPreview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--text-secondary);
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+}
+
+.avatarHint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* GearVN Form Style */
+.formRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.formLabel {
+  width: 150px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: right;
+  padding-right: var(--space-lg);
+  flex-shrink: 0;
+}
+
+.formInput {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.inputField {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg-body);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+.inputField:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.readOnlyText {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.changeLink {
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* Radio Group */
+.radioGroup {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+/* Date Dropdowns */
+.dateGroup {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.dateSelect {
+  padding: 0.5rem;
+  background: var(--bg-body);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  min-width: 80px;
+}
+
+.submitBtn {
+  margin-top: var(--space-xl);
+  margin-left: 150px; /* Align with inputs */
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+}
+
+.message {
+  margin-left: 150px;
+  margin-top: var(--space-md);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+.messageSuccess { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.messageError { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column-reverse;
+  }
+  .avatarArea {
+    width: 100%;
+    border-left: none;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-left: 0;
+    padding-bottom: var(--space-xl);
+  }
+  .formRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+  .formLabel {
+    width: 100%;
+    text-align: left;
+    padding-right: 0;
+  }
+  .submitBtn, .message {
+    margin-left: 0;
+    width: 100%;
+  }
+}

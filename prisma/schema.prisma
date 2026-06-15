@@ -1,0 +1,318 @@
+// VORTEX - Tech & Gaming Store
+// Database Schema (SQLite for local dev)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String?
+  phone         String?
+  address       String?
+  avatar        String?
+  gender        String?   // Nam, Nữ, Khác
+  dob           DateTime? // Ngày sinh
+  role          String    @default("USER") // USER, ADMIN
+  points        Int       @default(0)
+  vipTier       String    @default("MEMBER") // MEMBER, SILVER, GOLD, DIAMOND
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  addresses     Address[]
+  orders        Order[]
+  cartItems     CartItem[]
+  reviews       Review[]
+  wishlist      Wishlist[]
+  accounts      Account[]
+  pointHistories PointHistory[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? 
+  access_token      String? 
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? 
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  recipientName String
+  phoneNumber   String
+  province      String
+  district      String
+  ward          String
+  street        String
+  
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("addresses")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  image       String?
+  parentGroup String    // "gaming" or "tech"
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  description String?
+  specs       String?        // JSON string
+  price       Float
+  salePrice   Float?
+  stock       Int            @default(0)
+  brand       String?
+  isActive    Boolean        @default(true)
+  isFeatured  Boolean        @default(false)
+  soldCount   Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  categoryId  String
+  category    Category       @relation(fields: [categoryId], references: [id])
+
+  images      ProductImage[]
+  orderItems  OrderItem[]
+  cartItems   CartItem[]
+  reviews     Review[]
+  wishlistedBy Wishlist[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  quantity  Int      @default(1)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+  @@map("cart_items")
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  totalAmount     Float
+  shippingFee     Float         @default(0)
+  discount        Float         @default(0)
+
+  // Shipping info
+  recipientName   String
+  recipientPhone  String
+  shippingAddress String
+  note            String?
+
+  // Status
+  status          String        @default("PENDING") // PENDING, CONFIRMED, PROCESSING, SHIPPING, DELIVERED, CANCELLED
+  cancelReason    String?
+  paymentMethod   String        // COD, BANK_TRANSFER, VNPAY, MOMO
+  paymentStatus   String        @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+
+  // Coupon
+  couponCode      String?
+  coupon          Coupon?       @relation(fields: [couponCode], references: [code])
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+
+  items           OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  quantity  Int
+  price     Float    
+
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1 to 5
+  comment   String?
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@map("wishlists")
+}
+
+model ChatSession {
+  id          String   @id @default(cuid())
+  userId      String?
+  guestName   String   @default("Guest")
+  status      String   @default("AI") // AI, PENDING_HUMAN, HUMAN, CLOSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  messages    ChatMessage[]
+
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id          String   @id @default(cuid())
+  senderType  String   // USER, AI, STAFF
+  content     String
+  createdAt   DateTime @default(now())
+
+  sessionId   String
+  session     ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+model Coupon {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  discountPercent Int?     // 10 for 10%
+  discountAmount  Int?     // 50000 for 50k VND
+  minOrderValue   Int      @default(0)
+  costInPoints    Int?     // Số điểm cần để đổi mã này
+  maxUsage        Int      @default(100)
+  usedCount       Int      @default(0)
+  validFrom       DateTime @default(now())
+  validUntil      DateTime
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  orders          Order[]
+
+  @@map("coupons")
+}
+
+model PointHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  points      Int      // Số điểm (+ hoặc -)
+  type        String   // EARN_ORDER, REDEEM_COUPON, BONUS_BIRTHDAY, BONUS_NEW
+  description String?  // Ghi chú
+  
+  createdAt   DateTime @default(now())
+
+  @@map("point_histories")
+}
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  author      String
+  category    String   // Mới nhất, Tin tức, Đánh giá, Tư vấn, Thủ thuật
+  description String?
+  content     String?  // HTML content if needed
+  image       String?  // Cover image URL
+  bgColor     String?  // Hex color for featured background
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("news")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String?  // Nếu null thì là thông báo cho ADMIN
+  targetRole  String   @default("USER") // USER hoặc ADMIN
+  type        String   // ORDER_PLACED, LOW_STOCK, POINTS_REDEEMED, CART_ADDED, SUPPORT_MSG
+  title       String
+  message     String
+  link        String?  
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}

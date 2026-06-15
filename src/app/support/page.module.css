@@ -1,0 +1,311 @@
+.page {
+  padding: var(--space-4xl) 0;
+  min-height: 80vh;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+}
+
+.heroTitle {
+  font-family: var(--font-display);
+  font-size: var(--font-size-4xl);
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 20px var(--color-primary-dim);
+}
+
+.heroSubtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-3xl);
+  flex-wrap: wrap;
+}
+
+.tabBtn {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.tabBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-neon);
+}
+
+.tabBtn.activeTab {
+  background: var(--color-primary-dim);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-neon-strong);
+}
+
+/* Tab Contents */
+.tabContent {
+  animation: fadeIn 0.4s ease forwards;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* FAQ Module */
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.faqCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.faqCard:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.faqActive {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-neon);
+}
+
+.faqQuestion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.faqQuestion h3 {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.faqToggleIcon {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.faqAnswer {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  animation: slideDown 0.3s ease;
+}
+
+/* Policies Module */
+.policyGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+.policyCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  backdrop-filter: blur(20px);
+}
+
+.policyCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-neon);
+}
+
+.policyTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+}
+
+.policyText {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Buying Guide Timeline */
+.guideTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+  position: relative;
+  padding-left: var(--space-2xl);
+}
+
+.guideTimeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 24px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  opacity: 0.3;
+}
+
+.timelineNode {
+  display: flex;
+  gap: var(--space-xl);
+  position: relative;
+  align-items: flex-start;
+}
+
+.timelineNumber {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-primary);
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  z-index: 5;
+  box-shadow: var(--shadow-neon);
+  flex-shrink: 0;
+}
+
+.timelineContent {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  flex: 1;
+}
+
+.timelineTitle {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.timelineText {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+/* Contact Tab */
+.contactContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2xl);
+  align-items: start;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.infoCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.infoCard h4 {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  margin-bottom: var(--space-xs);
+  letter-spacing: 0.05em;
+}
+
+.infoCard p {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.contactFormContainer {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  backdrop-filter: blur(20px);
+}
+
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.formInput, .formTextarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: all var(--transition-base);
+}
+
+.formInput:focus, .formTextarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 10px var(--color-primary-dim);
+  background: var(--bg-glass-hover);
+}
+
+.successMessage {
+  padding: var(--space-lg);
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-align: center;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; overflow: hidden; }
+  to { opacity: 1; max-height: 200px; }
+}
+
+@media (max-width: 768px) {
+  .contactContainer {
+    grid-template-columns: 1fr;
+  }
+}

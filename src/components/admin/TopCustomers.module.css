@@ -1,0 +1,82 @@
+.container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-top: var(--space-xl);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-lg);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.loading, .empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: var(--space-2xl) 0;
+  font-size: var(--font-size-sm);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: var(--space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.rank {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--brand-primary);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.userName {
+  font-weight: 600;
+}
+
+.userEmail {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.totalSpent {
+  font-weight: 700;
+  color: var(--success-color);
+}
