@@ -14,10 +14,14 @@ export default function CartSync() {
     const prevUserId = prevUserIdRef.current;
     const currentUserId = session?.user?.id || null;
 
-    // Trường hợp 1: Vừa đăng nhập thành công
+    // Trường hợp 1: Đã xác thực
     if (status === 'authenticated' && currentUserId && prevUserId !== currentUserId) {
-      // Tải giỏ hàng từ server về
-      useCartStore.getState().loadFromServer();
+      // Nếu trạng thái trước đó là 'unauthenticated', nghĩa là người dùng vừa mới bấm đăng nhập
+      // Nếu trạng thái trước đó là 'loading', nghĩa là người dùng vừa F5/reload trang
+      const isJustLoggedIn = prevStatus === 'unauthenticated';
+      
+      // Tải giỏ hàng từ server về (chỉ gộp nếu vừa đăng nhập, còn reload thì đè luôn)
+      useCartStore.getState().loadFromServer(isJustLoggedIn);
     }
 
     // Trường hợp 2: Vừa đăng xuất

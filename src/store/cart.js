@@ -88,8 +88,8 @@ export const useCartStore = create(
         }
       },
 
-      // Tải giỏ hàng từ server về local (gọi khi đăng nhập)
-      loadFromServer: async () => {
+      // Tải giỏ hàng từ server về local
+      loadFromServer: async (mergeLocal = true) => {
         try {
           const res = await fetch('/api/cart');
           if (res.ok) {
@@ -97,31 +97,36 @@ export const useCartStore = create(
             const localItems = get().items;
 
             if (Array.isArray(serverItems)) {
-              const mergedMap = new Map();
+              if (mergeLocal) {
+                const mergedMap = new Map();
 
-              // 1. Đưa các item trên server vào map
-              serverItems.forEach((item) => {
-                mergedMap.set(item.id, item);
-              });
-
-              // 2. Gộp các item local chưa đăng nhập vào (cộng dồn nếu trùng)
-              localItems.forEach((item) => {
-                if (mergedMap.has(item.id)) {
-                  const existing = mergedMap.get(item.id);
-                  mergedMap.set(item.id, {
-                    ...existing,
-                    quantity: existing.quantity + item.quantity,
-                  });
-                } else {
+                // 1. Đưa các item trên server vào map
+                serverItems.forEach((item) => {
                   mergedMap.set(item.id, item);
-                }
-              });
+                });
 
-              const finalItems = Array.from(mergedMap.values());
-              set({ items: finalItems });
+                // 2. Gộp các item local chưa đăng nhập vào (cộng dồn nếu trùng)
+                localItems.forEach((item) => {
+                  if (mergedMap.has(item.id)) {
+                    const existing = mergedMap.get(item.id);
+                    mergedMap.set(item.id, {
+                      ...existing,
+                      quantity: existing.quantity + item.quantity,
+                    });
+                  } else {
+                    mergedMap.set(item.id, item);
+                  }
+                });
 
-              // 3. Đẩy kết quả gộp lên server ngay lập tức để lưu trữ
-              get().syncToServer();
+                const finalItems = Array.from(mergedMap.values());
+                set({ items: finalItems });
+
+                // 3. Đẩy kết quả gộp lên server ngay lập tức để lưu trữ
+                get().syncToServer();
+              } else {
+                // Chỉ đè dữ liệu từ server xuống (trường hợp reload trang)
+                set({ items: serverItems });
+              }
             }
           }
         } catch (e) {
