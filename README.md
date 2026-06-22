@@ -38,72 +38,7 @@ VORTEX là một nền tảng thương mại điện tử hiện đại, chuyên
 *   [NextAuth.js](https://next-auth.js.org/) (Xác thực với Credentials, Google, Facebook)
 *   Zustand (Quản lý State: Giỏ hàng, Toast, Auth Modal)
 
-## 📊 Sơ đồ Cơ sở Dữ liệu (ERD)
 
-Sơ đồ dưới đây mô tả cấu trúc và mối quan hệ giữa các bảng chính trong hệ thống VORTEX:
-
-```mermaid
-erDiagram
-    USER ||--o{ ADDRESS : "có"
-    USER ||--o{ ORDER : "đặt"
-    USER ||--o{ CART_ITEM : "thêm vào"
-    USER ||--o{ REVIEW : "đánh giá"
-    USER ||--o{ WISHLIST : "thích"
-    USER ||--o{ NOTIFICATION : "nhận"
-    
-    CATEGORY ||--o{ PRODUCT : "chứa"
-    
-    PRODUCT ||--o{ PRODUCT_IMAGE : "có"
-    PRODUCT ||--o{ PRODUCT_VARIANT : "có"
-    PRODUCT ||--o{ ORDER_ITEM : "nằm trong"
-    PRODUCT ||--o{ CART_ITEM : "nằm trong"
-    PRODUCT ||--o{ REVIEW : "nhận"
-    PRODUCT ||--o{ WISHLIST : "được thích bởi"
-    PRODUCT ||--o{ PRODUCT_VIEW : "được xem"
-
-    PRODUCT_VARIANT ||--o{ PRODUCT_IMAGE : "có ảnh riêng"
-    PRODUCT_VARIANT ||--o{ CART_ITEM : "được chọn trong"
-    PRODUCT_VARIANT ||--o{ ORDER_ITEM : "được đặt trong"
-
-    ORDER ||--o{ ORDER_ITEM : "chứa"
-    COUPON ||--o{ ORDER : "áp dụng cho"
-    
-    USER {
-        String id PK
-        String email UK
-        String name
-        String role "USER, ADMIN, SHIPPER"
-        Int points
-        String vipTier
-    }
-    
-    PRODUCT {
-        String id PK
-        String name
-        Float price
-        Int stock
-    }
-    
-    PRODUCT_VARIANT {
-        String id PK
-        String name
-        Int stock
-        Float priceOffset
-    }
-    
-    ORDER {
-        String id PK
-        String orderNumber UK
-        Float totalAmount
-        String status "PENDING, PROCESSING, SHIPPING, DELIVERED, FAILED_DELIVERY, CANCELLED"
-        String paymentMethod
-    }
-```
-
-> **💡 Hướng dẫn xem ERD**: Sơ đồ phía trên được viết dưới định dạng **Mermaid**. Bạn có thể xem hình ảnh trực quan của lược đồ này bằng các cách sau:
-> 1. Xem trực tiếp file `README.md` này trên GitHub (GitHub hỗ trợ render sẵn Mermaid).
-> 2. Sử dụng extension **Markdown Preview Mermaid Support** trên VSCode.
-> 3. Copy toàn bộ đoạn code trong khối ````mermaid ... ```` ở trên và dán vào trang web [Mermaid Live Editor](https://mermaid.live/) để xem và xuất ảnh.
 
 ## 🚀 Chức năng nổi bật
 * **Quản lý trạng thái (State Management):** Zustand.
