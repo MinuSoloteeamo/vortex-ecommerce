@@ -14,12 +14,13 @@ VORTEX là một nền tảng thương mại điện tử hiện đại, chuyên
   * Thiết kế Dark Mode toàn diện, sang trọng.
   * Hiệu ứng chuyển động mượt mà, Hover đa dạng (vd: Hover Drawer cực mượt bên trang Admin), thân thiện với người dùng.
 * **Sản phẩm & Mua sắm:**
-  * Bộ lọc sản phẩm chuyên sâu (theo danh mục, giá cả, sắp xếp). Bộ lọc giá thông minh chặn số âm và tự động hoán đổi khi giá trị min > max.
-  * Hiển thị trạng thái "Còn hàng" / "Hết hàng" dựa vào kho (inventory).
-  * Giỏ hàng sử dụng Zustand, tự động lưu (persist) qua local storage.
+  * Bộ lọc sản phẩm chuyên sâu (theo danh mục, thương hiệu, giá cả). Đặc biệt có **Bộ lọc Màu sắc động** tự động gom nhóm và nhận diện màu sắc từ biến thể (variants).
+  * Bộ lọc giá thông minh chặn số âm và tự động hoán đổi khi giá trị min > max.
+  * Hiển thị trạng thái "Còn hàng" / "Hết hàng" dựa vào kho (inventory), tự động hiển thị biến thể còn hàng nếu sản phẩm gốc hết hàng.
+  * Giỏ hàng sử dụng Zustand, tự động lưu (persist) qua local storage tích hợp UI Slider mượt mà.
   * Tìm kiếm thông minh: Gợi ý tức thì (autocomplete) theo danh mục và sản phẩm. Hỗ trợ **tìm kiếm tiếng Việt không dấu** (gõ "chuot" vẫn tìm ra "Chuột Gaming").
 * **Thanh toán & Đăng nhập (Authentication):**
-  * Đăng nhập an toàn với Email/Mật khẩu hoặc Đăng nhập mạng xã hội (**Google, Facebook**).
+  * Tích hợp NextAuth hoàn chỉnh, hỗ trợ **Đăng nhập/Đăng ký một chạm qua Google và Facebook** tiện lợi. Đăng nhập truyền thống an toàn với mật khẩu băm.
   * **Ràng buộc đăng nhập:** Bắt buộc người dùng đăng nhập mới có thể tiến hành thanh toán, chuyển hướng cực thông minh với cơ chế `callbackUrl`.
   * Hỗ trợ tính năng mã giảm giá, tính phí vận chuyển theo cấp bậc hạng VIP.
 * **AI & Thông minh & Hệ thống:**
@@ -53,10 +54,16 @@ erDiagram
     CATEGORY ||--o{ PRODUCT : "chứa"
     
     PRODUCT ||--o{ PRODUCT_IMAGE : "có"
+    PRODUCT ||--o{ PRODUCT_VARIANT : "có"
     PRODUCT ||--o{ ORDER_ITEM : "nằm trong"
     PRODUCT ||--o{ CART_ITEM : "nằm trong"
     PRODUCT ||--o{ REVIEW : "nhận"
     PRODUCT ||--o{ WISHLIST : "được thích bởi"
+    PRODUCT ||--o{ PRODUCT_VIEW : "được xem"
+
+    PRODUCT_VARIANT ||--o{ PRODUCT_IMAGE : "có ảnh riêng"
+    PRODUCT_VARIANT ||--o{ CART_ITEM : "được chọn trong"
+    PRODUCT_VARIANT ||--o{ ORDER_ITEM : "được đặt trong"
 
     ORDER ||--o{ ORDER_ITEM : "chứa"
     COUPON ||--o{ ORDER : "áp dụng cho"
@@ -75,6 +82,13 @@ erDiagram
         String name
         Float price
         Int stock
+    }
+    
+    PRODUCT_VARIANT {
+        String id PK
+        String name
+        Int stock
+        Float priceOffset
     }
     
     ORDER {
@@ -181,10 +195,16 @@ erDiagram
     Category ||--o{ Product : "chứa nhiều"
 
     Product ||--o{ ProductImage : "có nhiều ảnh"
+    Product ||--o{ ProductVariant : "có nhiều biến thể"
     Product ||--o{ OrderItem : "được mua trong"
     Product ||--o{ CartItem : "nằm trong giỏ"
     Product ||--o{ Review : "được đánh giá"
     Product ||--o{ Wishlist : "được yêu thích"
+    Product ||--o{ ProductView : "được theo dõi"
+
+    ProductVariant ||--o{ ProductImage : "chứa ảnh riêng"
+    ProductVariant ||--o{ OrderItem : "được mua"
+    ProductVariant ||--o{ CartItem : "trong giỏ"
 
     Order ||--o{ OrderItem : "gồm nhiều item"
     Order }o--o| Coupon : "áp dụng mã"
@@ -236,12 +256,22 @@ erDiagram
         string categoryId FK
     }
 
+    ProductVariant {
+        string id PK
+        string productId FK
+        string name
+        string sku
+        int stock
+        float priceOffset
+    }
+
     ProductImage {
         string id PK
         string url
         string alt
         int sortOrder
         string productId FK
+        string variantId FK
     }
 
     CartItem {
@@ -249,6 +279,7 @@ erDiagram
         int quantity
         string userId FK
         string productId FK
+        string variantId FK
     }
 
     Order {
@@ -273,6 +304,8 @@ erDiagram
         float price
         string orderId FK
         string productId FK
+        string variantId FK
+        string variantName
     }
 
     Review {

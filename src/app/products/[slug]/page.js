@@ -9,6 +9,7 @@ import ImageMagnifier from '@/components/ui/ImageMagnifier';
 import { ReviewService } from '@/services/ReviewService';
 import ReviewSection from '@/components/product/ReviewSection';
 import ViewedProductTracker from '@/components/product/ViewedProductTracker';
+import ProductInteractive from '@/components/product/ProductInteractive';
 import { auth } from '@/auth';
 import { ProductService } from '@/services/ProductService';
 
@@ -42,6 +43,11 @@ export default async function ProductDetailPage({ params }) {
       include: {
         category: true,
         images: { orderBy: { sortOrder: 'asc' } },
+        variants: {
+          include: {
+            images: { orderBy: { sortOrder: 'asc' } }
+          }
+        }
       },
     }),
     auth()
@@ -103,94 +109,11 @@ export default async function ProductDetailPage({ params }) {
     <div className={styles.page}>
       <ViewedProductTracker product={cartProduct} />
       <div className={`container ${styles.container}`}>
-        {/* GALLERY */}
-        <div className={styles.gallery}>
-          <div className={styles.mainImage}>
-            <ImageMagnifier src={mainImage} alt={product.name} />
-          </div>
-          <div className={styles.thumbnails}>
-            <div className={`${styles.thumbnail} ${styles.active}`}>
-              {mainImage.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i) ? (
-                <img src={mainImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              ) : (
-                <span className={styles.thumbEmoji}>{mainImage}</span>
-              )}
-            </div>
-            {/* Fake thumbnails for UI demo */}
-            {[1, 2, 3].map(i => (
-              <div key={i} className={styles.thumbnail}>
-                {mainImage.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i) ? (
-                  <img src={mainImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', opacity: 0.5 }} />
-                ) : (
-                  <span className={styles.thumbEmoji}>{mainImage}</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* INFO */}
-        <div className={styles.info}>
-          <div className={styles.breadcrumb}>
-            <Link href="/">Trang chủ</Link>
-            <span>/</span>
-            <Link href={`/products?category=${product.category?.slug}`}>
-              {product.category?.name}
-            </Link>
-            <span>/</span>
-            <span style={{ color: 'var(--text-primary)' }}>{product.name}</span>
-          </div>
-
-          {product.isFeatured && (
-            <span className={styles.badge}>Sản phẩm nổi bật</span>
-          )}
-
-          <h1 className={styles.title}>{product.name}</h1>
-          
-          <div className={styles.brand}>
-            Thương hiệu: <strong>{product.brand || 'VORTEX'}</strong> | SKU: VTX-{product.id.slice(-6).toUpperCase()}
-          </div>
-
-          <div className={styles.pricing}>
-            {product.salePrice ? (
-              <>
-                <span className={styles.salePrice}>{formatPrice(product.salePrice)}</span>
-                <span className={styles.originalPrice}>{formatPrice(product.price)}</span>
-              </>
-            ) : (
-              <span className={styles.price}>{formatPrice(product.price)}</span>
-            )}
-          </div>
-
-          <div className={`${styles.stockStatus} ${product.stock > 0 ? styles.inStock : styles.outOfStock}`}>
-            <span style={{ fontSize: '1.2rem' }}>{product.stock > 0 ? '✓' : '✗'}</span>
-            {product.stock > 0 ? `Còn hàng (${product.stock} sản phẩm)` : 'Tạm hết hàng'}
-          </div>
-
-          <div className={styles.description}>
-            {product.description || 'Chưa có mô tả cho sản phẩm này.'}
-          </div>
-
-          <div className={styles.actions}>
-            <div style={{ flex: 1 }}>
-              <AddToCartButton product={cartProduct} fullWidth={true} />
-            </div>
-            <AddToWishlistButton productId={product.id} initialWishlisted={isWishlisted} />
-          </div>
-
-          <div className={styles.tabs}>
-            <div className={styles.tabList}>
-              <button className={`${styles.tab} ${styles.active}`}>Mô tả chi tiết</button>
-              <button className={styles.tab}>Thông số kỹ thuật</button>
-            </div>
-            <div className={styles.tabContent}>
-              <p>{product.description}</p>
-              <p style={{ marginTop: '1rem' }}>
-                * Sản phẩm được bảo hành chính hãng 24 tháng theo quy định của nhà sản xuất. Hỗ trợ đổi trả miễn phí trong 30 ngày đầu nếu có lỗi phần cứng.
-              </p>
-            </div>
-          </div>
-        </div>
+        <ProductInteractive 
+          product={product} 
+          isWishlisted={isWishlisted} 
+          cartProduct={cartProduct} 
+        />
       </div>
       
       {/* RELATED PRODUCTS */}

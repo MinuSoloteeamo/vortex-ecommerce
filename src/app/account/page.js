@@ -13,15 +13,20 @@ function maskEmail(email) {
 
 function maskPhone(phone) {
   if (!phone) return 'Chưa cập nhật';
-  if (phone.length < 4) return phone;
-  return `*******${phone.slice(-3)}`;
+  if (phone.length < 6) return phone;
+  const first2 = phone.substring(0, 2);
+  const last3 = phone.slice(-3);
+  const maskLength = phone.length - 5;
+  const mask = '*'.repeat(maskLength > 0 ? maskLength : 5);
+  return `${first2}${mask}${last3}`;
 }
 
 export default function AccountInfoPage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showFullPhone, setShowFullPhone] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -44,29 +49,38 @@ export default function AccountInfoPage() {
       if (res.ok) {
         const data = await res.json();
         setProfile(data);
-        
-        let day = '1', month = '1', year = '2000';
-        if (data.dob) {
-          const d = new Date(data.dob);
-          day = d.getDate().toString();
-          month = (d.getMonth() + 1).toString();
-          year = d.getFullYear().toString();
-        }
-
-        setForm({
-          name: data.name || '',
-          gender: data.gender || 'Nam',
-          phone: data.phone || '',
-          dobDay: day,
-          dobMonth: month,
-          dobYear: year
-        });
+        resetFormWithProfile(data);
       }
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetFormWithProfile = (data) => {
+    let day = '1', month = '1', year = '2000';
+    if (data.dob) {
+      const d = new Date(data.dob);
+      day = d.getDate().toString();
+      month = (d.getMonth() + 1).toString();
+      year = d.getFullYear().toString();
+    }
+
+    setForm({
+      name: data.name || '',
+      gender: data.gender || 'Nam',
+      phone: data.phone || '',
+      dobDay: day,
+      dobMonth: month,
+      dobYear: year
+    });
+  };
+
+  const handleCancel = () => {
+    resetFormWithProfile(profile);
+    setIsEditing(false);
+    setMsg({ type: '', text: '' });
   };
 
   const handleSubmit = async (e) => {
@@ -90,9 +104,9 @@ export default function AccountInfoPage() {
       
       if (res.ok) {
         const updated = await res.json();
-        setProfile(updated);
+        setProfile(updated.user || updated);
         setMsg({ type: 'success', text: 'Cập nhật hồ sơ thành công!' });
-        setIsEditingPhone(false);
+        setIsEditing(false);
       } else {
         setMsg({ type: 'error', text: 'Có lỗi xảy ra' });
       }
@@ -171,6 +185,8 @@ export default function AccountInfoPage() {
                   value={form.name}
                   onChange={e => setForm({...form, name: e.target.value})}
                   required
+                  disabled={!isEditing}
+                  style={{ opacity: isEditing ? 1 : 0.7 }}
                 />
               </div>
             </div>
@@ -179,26 +195,40 @@ export default function AccountInfoPage() {
               <div className={styles.formLabel}>Email</div>
               <div className={styles.formInput}>
                 <span className={styles.readOnlyText}>{maskEmail(profile.email)}</span>
-                {/* <button type="button" className={styles.changeLink}>Thay Đổi</button> */}
               </div>
             </div>
 
             <div className={styles.formRow}>
               <div className={styles.formLabel}>Số điện thoại</div>
               <div className={styles.formInput}>
-                {isEditingPhone ? (
+                {isEditing ? (
                   <input 
                     type="tel" 
                     className={styles.inputField} 
                     value={form.phone}
                     onChange={e => setForm({...form, phone: e.target.value})}
-                    autoFocus
+                    placeholder="Nhập số điện thoại"
                   />
                 ) : (
-                  <>
-                    <span className={styles.readOnlyText}>{maskPhone(profile.phone)}</span>
-                    <button type="button" className={styles.changeLink} onClick={() => setIsEditingPhone(true)}>Thay Đổi</button>
-                  </>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className={styles.readOnlyText}>
+                      {showFullPhone ? profile.phone : maskPhone(profile.phone)}
+                    </span>
+                    {profile.phone && (
+                      <button 
+                        type="button" 
+                        onClick={() => setShowFullPhone(!showFullPhone)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}
+                        title={showFullPhone ? "Ẩn số điện thoại" : "Hiện số điện thoại"}
+                      >
+                        {showFullPhone ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"/></svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -206,7 +236,7 @@ export default function AccountInfoPage() {
             <div className={styles.formRow}>
               <div className={styles.formLabel}>Giới tính</div>
               <div className={styles.formInput}>
-                <div className={styles.radioGroup}>
+                <div className={styles.radioGroup} style={{ opacity: isEditing ? 1 : 0.7, pointerEvents: isEditing ? 'auto' : 'none' }}>
                   <label className={styles.radioLabel}>
                     <input 
                       type="radio" 
@@ -214,6 +244,7 @@ export default function AccountInfoPage() {
                       value="Nam" 
                       checked={form.gender === 'Nam'} 
                       onChange={e => setForm({...form, gender: e.target.value})}
+                      tabIndex={!isEditing ? -1 : 0}
                     /> Nam
                   </label>
                   <label className={styles.radioLabel}>
@@ -223,6 +254,7 @@ export default function AccountInfoPage() {
                       value="Nữ" 
                       checked={form.gender === 'Nữ'}
                       onChange={e => setForm({...form, gender: e.target.value})}
+                      tabIndex={!isEditing ? -1 : 0}
                     /> Nữ
                   </label>
                   <label className={styles.radioLabel}>
@@ -232,6 +264,7 @@ export default function AccountInfoPage() {
                       value="Khác" 
                       checked={form.gender === 'Khác'}
                       onChange={e => setForm({...form, gender: e.target.value})}
+                      tabIndex={!isEditing ? -1 : 0}
                     /> Khác
                   </label>
                 </div>
@@ -241,18 +274,18 @@ export default function AccountInfoPage() {
             <div className={styles.formRow}>
               <div className={styles.formLabel}>Ngày sinh</div>
               <div className={styles.formInput}>
-                <div className={styles.dateGroup}>
-                  <select className={styles.dateSelect} value={form.dobDay} onChange={e => setForm({...form, dobDay: e.target.value})}>
+                <div className={styles.dateGroup} style={{ opacity: isEditing ? 1 : 0.7 }}>
+                  <select className={styles.dateSelect} value={form.dobDay} onChange={e => setForm({...form, dobDay: e.target.value})} disabled={!isEditing}>
                     {Array.from({length: 31}, (_, i) => i + 1).map(d => (
                       <option key={d} value={d}>{d}</option>
                     ))}
                   </select>
-                  <select className={styles.dateSelect} value={form.dobMonth} onChange={e => setForm({...form, dobMonth: e.target.value})}>
+                  <select className={styles.dateSelect} value={form.dobMonth} onChange={e => setForm({...form, dobMonth: e.target.value})} disabled={!isEditing}>
                     {Array.from({length: 12}, (_, i) => i + 1).map(m => (
                       <option key={m} value={m}>Tháng {m}</option>
                     ))}
                   </select>
-                  <select className={styles.dateSelect} value={form.dobYear} onChange={e => setForm({...form, dobYear: e.target.value})}>
+                  <select className={styles.dateSelect} value={form.dobYear} onChange={e => setForm({...form, dobYear: e.target.value})} disabled={!isEditing}>
                     {Array.from({length: 100}, (_, i) => new Date().getFullYear() - i).map(y => (
                       <option key={y} value={y}>{y}</option>
                     ))}
@@ -267,9 +300,22 @@ export default function AccountInfoPage() {
               </div>
             )}
 
-            <button type="submit" className={`btn btn-primary ${styles.submitBtn}`}>
-              Lưu thay đổi
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              {!isEditing ? (
+                <button type="button" onClick={() => setIsEditing(true)} className={`btn btn-primary ${styles.submitBtn}`}>
+                  Chỉnh sửa hồ sơ
+                </button>
+              ) : (
+                <>
+                  <button type="button" onClick={handleCancel} className={`btn btn-secondary ${styles.submitBtn}`} style={{ background: 'transparent', border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}>
+                    Hủy
+                  </button>
+                  <button type="submit" className={`btn btn-primary ${styles.submitBtn}`}>
+                    Lưu thay đổi
+                  </button>
+                </>
+              )}
+            </div>
           </form>
         </div>
 

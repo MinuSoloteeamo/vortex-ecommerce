@@ -13,11 +13,13 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
+  emailVerified DateTime? // Bắt buộc cho NextAuth
   name          String
   password      String?
   phone         String?
   address       String?
   avatar        String?
+  image         String?   // Bắt buộc cho NextAuth (lưu avatar từ Google/FB)
   gender        String?   // Nam, Nữ, Khác
   dob           DateTime? // Ngày sinh
   role          String    @default("USER") // USER, ADMIN
@@ -34,6 +36,7 @@ model User {
   accounts      Account[]
   pointHistories PointHistory[]
   notifications Notification[]
+  productViews  ProductView[]
 
   @@map("users")
 }
@@ -98,7 +101,10 @@ model Product {
   name        String
   slug        String         @unique
   description String?
+  model3dUrl  String?        // Link embed Sketchfab 3D
   specs       String?        // JSON string
+  features    String?        // JSON string (array of highlights)
+  baseVariantName String?    // Tên hiển thị cho phiên bản gốc (vd: Đen, Tiêu chuẩn)
   price       Float
   salePrice   Float?
   stock       Int            @default(0)
@@ -112,13 +118,34 @@ model Product {
   categoryId  String
   category    Category       @relation(fields: [categoryId], references: [id])
 
+  variants    ProductVariant[]
   images      ProductImage[]
   orderItems  OrderItem[]
   cartItems   CartItem[]
   reviews     Review[]
   wishlistedBy Wishlist[]
+  views       ProductView[]
 
   @@map("products")
+}
+
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  name        String   // Tên biến thể (vd: "Đen", "Trắng")
+  sku         String?  // Mã SKU riêng nếu có
+  stock       Int      @default(0)
+  priceOffset Float    @default(0) // Số tiền cộng thêm hoặc trừ đi so với giá gốc
+  specs       String?  // JSON string
+  features    String?  // JSON string (array of objects)
+
+  images      ProductImage[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+
+  @@map("product_variants")
 }
 
 model ProductImage {
@@ -129,6 +156,9 @@ model ProductImage {
 
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@map("product_images")
 }
@@ -143,10 +173,13 @@ model CartItem {
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, productId])
+  @@unique([userId, productId, variantId])
   @@map("cart_items")
 }
 
@@ -194,6 +227,10 @@ model OrderItem {
 
   productId String
   product   Product  @relation(fields: [productId], references: [id])
+
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  variantName String?
 
   @@map("order_items")
 }
@@ -315,4 +352,19 @@ model Notification {
   user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+model ProductView {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId    String   
+  viewDuration Int      @default(0) // seconds
+  converted    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("product_views")
 }

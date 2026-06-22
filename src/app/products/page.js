@@ -53,17 +53,52 @@ export default async function ProductsPage({ searchParams }) {
 
   const brands = brandsResult.map(b => b.brand);
 
-  // Extract available dynamic specs from allBaseProducts
+  // Parse color filter from searchParams
+  const colorFilter = resolvedSearchParams.color 
+    ? (Array.isArray(resolvedSearchParams.color) ? resolvedSearchParams.color : [resolvedSearchParams.color]) 
+    : [];
+
+  // Extract available dynamic specs from allBaseProducts (exclude color-related specs)
   const availableSpecs = {};
   allBaseProducts.forEach(p => {
     if (p.specs) {
       try {
         const parsed = JSON.parse(p.specs);
-        for (const [key, val] of Object.entries(parsed)) {
-          if (!availableSpecs[key]) availableSpecs[key] = new Set();
-          availableSpecs[key].add(val);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(spec => {
+            if (spec.key && spec.value) {
+              const keyLower = spec.key.toLowerCase();
+              if (keyLower.includes('màu') || keyLower.includes('color')) return; // skip color specs
+              if (!availableSpecs[spec.key]) availableSpecs[spec.key] = new Set();
+              availableSpecs[spec.key].add(spec.value);
+            }
+          });
+        } else if (typeof parsed === 'object' && parsed !== null) {
+          for (const [key, val] of Object.entries(parsed)) {
+            const keyLower = key.toLowerCase();
+            if (keyLower.includes('màu') || keyLower.includes('color')) continue; // skip color specs
+            if (!availableSpecs[key]) availableSpecs[key] = new Set();
+            availableSpecs[key].add(val);
+          }
         }
       } catch (e) {}
+    }
+  });
+
+  // Extract real colors from baseVariantName + variant names (normalize to merge duplicates)
+  const colorMap = new Map(); // lowercase -> display name
+  allBaseProducts.forEach(p => {
+    if (p.baseVariantName) {
+      const key = p.baseVariantName.trim().toLowerCase();
+      if (!colorMap.has(key)) colorMap.set(key, p.baseVariantName.trim());
+    }
+    if (p.variants?.length > 0) {
+      p.variants.forEach(v => {
+        if (v.name) {
+          const key = v.name.trim().toLowerCase();
+          if (!colorMap.has(key)) colorMap.set(key, v.name.trim());
+        }
+      });
     }
   });
 
@@ -71,6 +106,23 @@ export default async function ProductsPage({ searchParams }) {
   const dynamicSpecsOptions = {};
   for (const key in availableSpecs) {
     dynamicSpecsOptions[key] = Array.from(availableSpecs[key]).sort();
+  }
+
+  const colorOptions = Array.from(colorMap.values()).sort();
+
+  // Filter products by color if color filter is active
+  let filteredProducts = products;
+  if (colorFilter.length > 0) {
+    const normalizeColor = (c) => (c || '').toLowerCase().trim();
+    const filterColors = colorFilter.map(normalizeColor);
+    
+    filteredProducts = products.filter(p => {
+      // Check baseVariantName
+      if (p.baseVariantName && filterColors.includes(normalizeColor(p.baseVariantName))) return true;
+      // Check variant names
+      if (p.variants?.some(v => filterColors.includes(normalizeColor(v.name)))) return true;
+      return false;
+    });
   }
 
   // Fetch wishlisted product ids if user is logged in
@@ -108,46 +160,32 @@ export default async function ProductsPage({ searchParams }) {
         </div>
 
         <div className={styles.container}>
-          {/* SIDEBAR */}
-          <div style={{ width: '280px', flexShrink: 0 }}>
+          {/* MAIN CONTENT */}
+          <main className={styles.main}>
             {filters.search && (
               <div style={{ marginBottom: '1rem' }}>
-                <Link href="/products" className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', display: 'inline-block', width: '100%', textAlign: 'center' }}>
+                <Link href="/products" className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', display: 'inline-block' }}>
                   Xóa tìm kiếm: "{filters.search}"
                 </Link>
               </div>
             )}
+            
             <ProductFilters 
               categories={categories} 
               brands={brands} 
               dynamicSpecs={dynamicSpecsOptions}
+              colorOptions={colorOptions}
+              totalProducts={filteredProducts.length}
+              currentSort={filters.sortBy}
             />
-          </div>
 
-          {/* MAIN CONTENT */}
-          <main className={styles.main}>
-            <div className={styles.toolbar} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-              <div className={styles.resultsCount}>
-                Hiển thị <strong>{products.length}</strong> sản phẩm
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Sắp xếp:</span>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <Link href={buildUrl('sortBy', '')} style={{ padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.875rem', background: !filters.sortBy ? 'var(--color-primary-dim)' : 'var(--bg-glass)', color: !filters.sortBy ? 'var(--color-primary)' : 'var(--text-primary)', border: '1px solid var(--border-subtle)', textDecoration: 'none' }}>Mới nhất</Link>
-                  <Link href={buildUrl('sortBy', 'price_asc')} style={{ padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.875rem', background: filters.sortBy === 'price_asc' ? 'var(--color-primary-dim)' : 'var(--bg-glass)', color: filters.sortBy === 'price_asc' ? 'var(--color-primary)' : 'var(--text-primary)', border: '1px solid var(--border-subtle)', textDecoration: 'none' }}>Giá Tăng</Link>
-                  <Link href={buildUrl('sortBy', 'price_desc')} style={{ padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.875rem', background: filters.sortBy === 'price_desc' ? 'var(--color-primary-dim)' : 'var(--bg-glass)', color: filters.sortBy === 'price_desc' ? 'var(--color-primary)' : 'var(--text-primary)', border: '1px solid var(--border-subtle)', textDecoration: 'none' }}>Giá Giảm</Link>
-                </div>
-              </div>
-            </div>
-
-            {products.length === 0 ? (
+            {filteredProducts.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
                 Không tìm thấy sản phẩm nào phù hợp với bộ lọc.
               </div>
             ) : (
               <div className={styles.grid}>
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <ProductCard 
                     key={product.id} 
                     product={product} 

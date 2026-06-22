@@ -79,7 +79,7 @@ export default function CartPage() {
                       <div className={styles.quantityCtrl}>
                         <button 
                           className={styles.qtyBtn}
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.id, item.variantId, item.quantity - 1)}
                           disabled={item.quantity <= 1}
                         >
                           -
@@ -94,18 +94,18 @@ export default function CartPage() {
                             let val = parseInt(e.target.value);
                             if (isNaN(val)) return;
                             if (val > 99) val = 99;
-                            updateQuantity(item.id, val);
+                            updateQuantity(item.id, item.variantId, val);
                           }}
                           onBlur={(e) => {
                             let val = parseInt(e.target.value);
                             if (isNaN(val) || val < 1) {
-                              updateQuantity(item.id, 1);
+                              updateQuantity(item.id, item.variantId, 1);
                             }
                           }}
                         />
                         <button 
                           className={styles.qtyBtn}
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.id, item.variantId, item.quantity + 1)}
                           disabled={item.quantity >= 99}
                         >
                           +
@@ -114,7 +114,7 @@ export default function CartPage() {
                       
                       <button 
                         className={styles.removeBtn}
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.id, item.variantId)}
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M3 6h18" strokeLinecap="round"/>

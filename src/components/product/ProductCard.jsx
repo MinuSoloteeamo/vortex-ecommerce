@@ -50,15 +50,35 @@ export default function ProductCard({ product, initialWishlisted = false }) {
     }
   };
 
-  const imageSrc = product.images?.[0]?.url || '📦';
+  let currentStock = product.stock;
+  let currentPrice = product.price;
+  let currentSalePrice = product.salePrice;
+  let imageSrc = product.images?.[0]?.url || '📦';
+  let selectedVariant = null;
+
+  if (currentStock <= 0 && product.variants?.length > 0) {
+    const newestAvailable = [...product.variants].reverse().find(v => v.stock > 0);
+    if (newestAvailable) {
+      selectedVariant = newestAvailable;
+      currentStock = newestAvailable.stock;
+      currentPrice = (product.price || 0) + (newestAvailable.priceOffset || 0);
+      if (product.salePrice) {
+        currentSalePrice = product.salePrice + (newestAvailable.priceOffset || 0);
+      }
+      if (newestAvailable.images?.[0]?.url) {
+        imageSrc = newestAvailable.images[0].url;
+      }
+    }
+  }
+
   const cartProduct = {
     id: product.id,
     name: product.name,
     slug: product.slug,
-    price: product.price,
-    salePrice: product.salePrice,
+    price: currentPrice,
+    salePrice: currentSalePrice,
     images: product.images,
-    stock: product.stock,
+    stock: currentStock,
   };
 
   return (
@@ -88,18 +108,18 @@ export default function ProductCard({ product, initialWishlisted = false }) {
           <span className={styles.productCategory}>{product.category?.name}</span>
           <h3 className={styles.productName}>{product.name}</h3>
           <div className={styles.productPricing}>
-            {product.salePrice ? (
+            {currentSalePrice ? (
               <>
                 <span className={styles.productSalePrice}>
-                  {formatPrice(product.salePrice)}
+                  {formatPrice(currentSalePrice)}
                 </span>
                 <span className={styles.productOriginalPrice}>
-                  {formatPrice(product.price)}
+                  {formatPrice(currentPrice)}
                 </span>
               </>
             ) : (
               <span className={styles.productPrice}>
-                {formatPrice(product.price)}
+                {formatPrice(currentPrice)}
               </span>
             )}
           </div>

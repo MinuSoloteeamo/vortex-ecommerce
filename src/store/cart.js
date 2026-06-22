@@ -5,10 +5,15 @@ export const useCartStore = create(
   persist(
     (set, get) => ({
       items: [],
+      isDrawerOpen: false,
+      openDrawer: () => set({ isDrawerOpen: true }),
+      closeDrawer: () => set({ isDrawerOpen: false }),
 
-      addItem: (product, quantity = 1) => {
+      addItem: (product, quantity = 1, variant = null) => {
         set((state) => {
-          const existingIndex = state.items.findIndex((item) => item.id === product.id);
+          const existingIndex = state.items.findIndex((item) => 
+            item.id === product.id && item.variantId === (variant?.id || null)
+          );
 
           if (existingIndex > -1) {
             const newItems = [...state.items];
@@ -26,10 +31,12 @@ export const useCartStore = create(
                 id: product.id,
                 name: product.name,
                 slug: product.slug,
-                price: product.salePrice || product.price,
+                price: variant ? (product.salePrice || product.price) + variant.priceOffset : (product.salePrice || product.price),
                 originalPrice: product.price,
-                image: product.images?.[0]?.url || '/images/placeholder.png',
+                image: variant?.images?.[0]?.url || product.images?.[0]?.url || '/images/placeholder.png',
                 quantity,
+                variantId: variant?.id || null,
+                variantName: variant?.name || null,
               },
             ],
           };
@@ -39,21 +46,21 @@ export const useCartStore = create(
         get().syncToServer();
       },
 
-      removeItem: (productId) => {
+      removeItem: (productId, variantId = null) => {
         set((state) => ({
-          items: state.items.filter((item) => item.id !== productId),
+          items: state.items.filter((item) => !(item.id === productId && item.variantId === variantId)),
         }));
         get().syncToServer();
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (productId, variantId, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(productId, variantId);
           return;
         }
         set((state) => ({
           items: state.items.map((item) =>
-            item.id === productId ? { ...item, quantity } : item
+            (item.id === productId && item.variantId === variantId) ? { ...item, quantity } : item
           ),
         }));
         get().syncToServer();
@@ -100,21 +107,23 @@ export const useCartStore = create(
               if (mergeLocal) {
                 const mergedMap = new Map();
 
-                // 1. Đưa các item trên server vào map
+                // 1. Đưa các item trên server vào map (key: id_variantId)
                 serverItems.forEach((item) => {
-                  mergedMap.set(item.id, item);
+                  const key = `${item.id}_${item.variantId || 'none'}`;
+                  mergedMap.set(key, item);
                 });
 
                 // 2. Gộp các item local chưa đăng nhập vào (cộng dồn nếu trùng)
                 localItems.forEach((item) => {
-                  if (mergedMap.has(item.id)) {
-                    const existing = mergedMap.get(item.id);
-                    mergedMap.set(item.id, {
+                  const key = `${item.id}_${item.variantId || 'none'}`;
+                  if (mergedMap.has(key)) {
+                    const existing = mergedMap.get(key);
+                    mergedMap.set(key, {
                       ...existing,
                       quantity: existing.quantity + item.quantity,
                     });
                   } else {
-                    mergedMap.set(item.id, item);
+                    mergedMap.set(key, item);
                   }
                 });
 

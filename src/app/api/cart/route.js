@@ -17,6 +17,11 @@ export async function GET() {
           include: {
             images: { take: 1, orderBy: { sortOrder: 'asc' } }
           }
+        },
+        variant: {
+          include: {
+            images: { take: 1, orderBy: { sortOrder: 'asc' } }
+          }
         }
       }
     });
@@ -24,15 +29,20 @@ export async function GET() {
     // Format cho Zustand store
     const items = cartItems
       .filter(item => item.product) // Bỏ qua sản phẩm đã bị xóa
-      .map(item => ({
-        id: item.product.id,
-        name: item.product.name,
-        slug: item.product.slug,
-        price: item.product.salePrice || item.product.price,
-        originalPrice: item.product.price,
-        image: item.product.images?.[0]?.url || '/images/placeholder.png',
-        quantity: item.quantity,
-      }));
+      .map(item => {
+        const pPrice = item.product.salePrice || item.product.price;
+        return {
+          id: item.product.id,
+          name: item.product.name,
+          slug: item.product.slug,
+          price: item.variant ? pPrice + item.variant.priceOffset : pPrice,
+          originalPrice: item.product.price,
+          image: item.variant?.images?.[0]?.url || item.product.images?.[0]?.url || '/images/placeholder.png',
+          quantity: item.quantity,
+          variantId: item.variantId,
+          variantName: item.variant?.name,
+        };
+      });
 
     return NextResponse.json(items);
   } catch (error) {
@@ -61,6 +71,7 @@ export async function POST(req) {
         data: items.map(item => ({
           userId,
           productId: item.id,
+          variantId: item.variantId || null,
           quantity: item.quantity,
         })),
       });

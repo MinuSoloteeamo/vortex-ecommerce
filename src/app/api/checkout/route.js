@@ -55,15 +55,34 @@ export async function POST(req) {
 
     for (const item of items) {
       const dbProduct = dbProducts.find(p => p.id === item.productId);
-      if (!dbProduct || !dbProduct.isActive || dbProduct.stock < item.quantity) {
-        return NextResponse.json({ message: `Sản phẩm không hợp lệ hoặc hết hàng: ${dbProduct?.name || item.productId}` }, { status: 400 });
+      if (!dbProduct || !dbProduct.isActive) {
+        return NextResponse.json({ message: `Sản phẩm không hợp lệ: ${item.productId}` }, { status: 400 });
       }
-      
-      const priceToUse = dbProduct.salePrice || dbProduct.price;
+
+      let priceToUse = dbProduct.salePrice || dbProduct.price;
+      let variantName = null;
+      let variantId = item.variantId || null;
+
+      // Check variant stock if applicable
+      if (variantId) {
+        const variant = await prisma.productVariant.findUnique({ where: { id: variantId } });
+        if (!variant || variant.stock < item.quantity) {
+          return NextResponse.json({ message: `Biến thể không hợp lệ hoặc hết hàng: ${variant?.name || variantId}` }, { status: 400 });
+        }
+        priceToUse += variant.priceOffset;
+        variantName = variant.name;
+      } else {
+        if (dbProduct.stock < item.quantity) {
+          return NextResponse.json({ message: `Sản phẩm hết hàng: ${dbProduct.name}` }, { status: 400 });
+        }
+      }
+
       subtotal += priceToUse * item.quantity;
       
       finalOrderItems.push({
         productId: item.productId,
+        variantId: variantId,
+        variantName: variantName,
         quantity: item.quantity,
         price: priceToUse,
       });
@@ -159,6 +178,8 @@ export async function POST(req) {
       const orderItemsData = finalOrderItems.map(item => ({
         orderId: newOrder.id,
         productId: item.productId,
+        variantId: item.variantId,
+        variantName: item.variantName,
         quantity: item.quantity,
         price: item.price,
       }));
@@ -184,14 +205,37 @@ export async function POST(req) {
 
       // Update stock
       for (const item of finalOrderItems) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: { decrement: item.quantity },
-            soldCount: { increment: item.quantity }
-          }
-        });
+        if (item.variantId) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: { stock: { decrement: item.quantity } }
+          });
+          // Also increment product sold count
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { soldCount: { increment: item.quantity } }
+          });
+        } else {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: { decrement: item.quantity },
+              soldCount: { increment: item.quantity }
+            }
+          });
+        }
       }
+
+      // Record conversion for analytics
+      await tx.productView.updateMany({
+        where: {
+          userId: userId,
+          productId: { in: finalOrderItems.map(i => i.productId) }
+        },
+        data: {
+          converted: true
+        }
+      });
 
       return newOrder;
     });

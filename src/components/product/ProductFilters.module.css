@@ -1,125 +1,268 @@
-.sidebar {
-  background: var(--bg-card);
+/* ================= TOOLBAR ================= */
+.toolbarWrapper {
+  margin-bottom: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.toolbarTop {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btnFilterToggle, .btnSortToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #1e1e1e;
   border: 1px solid var(--border-subtle);
-  border-radius: 16px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnFilterToggle:hover, .btnSortToggle:hover {
+  background: #2a2a2a;
+  border-color: #555;
+}
+
+.sortDropdownContainer {
+  position: relative;
+}
+
+.sortDropdownBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+.sortDropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #1a1a1a;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.5rem 0;
+  min-width: 200px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.sortDropdownItem {
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1rem;
+  color: #ccc;
+  text-align: left;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sortDropdownItem:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.activeSort {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.toolbarBottom {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ================= DRAWER ================= */
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+  opacity: 1;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: -400px;
+  width: 360px;
+  max-width: 100vw;
+  background: #111;
+  z-index: 1000;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+}
+
+.drawerOpen {
+  left: 0;
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.drawerTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.drawerCloseBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.drawerCloseBtn:hover {
+  color: #fff;
+}
+
+.drawerContent {
+  flex: 1;
+  overflow-y: auto;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  position: sticky;
-  top: 90px;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
 }
 
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
+/* Custom Scrollbar */
+.drawerContent::-webkit-scrollbar { width: 6px; }
+.drawerContent::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+.drawerContent::-webkit-scrollbar-thumb:hover { background: #555; }
 
-.sidebar::-webkit-scrollbar-thumb {
-  background: var(--border-subtle);
-  border-radius: 4px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* ================= ACCORDION ================= */
+.accordionGroup {
   border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 1rem;
 }
-
-.headerTitle {
-  font-size: 1.125rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.accordionGroup:last-child {
+  border-bottom: none;
 }
 
-.clearBtn {
-  background: none;
+.accordionHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
   border: none;
-  color: var(--color-danger);
-  font-size: 0.875rem;
+  color: #fff;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  padding: 0.5rem 0;
 }
 
-.clearBtn:hover {
-  background: rgba(255, 51, 102, 0.1);
-}
-
-.filterGroup {
+.accordionBody {
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.groupTitle {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.checkboxList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
+/* ================= CUSTOM CHECKBOX ================= */
 .checkboxLabel {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+  font-size: 0.95rem;
+  color: #ccc;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
+  position: relative;
 }
 
 .checkboxLabel:hover {
-  color: var(--color-primary);
+  color: #fff;
 }
 
 .checkboxLabel input[type="checkbox"] {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--border-subtle);
-  border-radius: 4px;
-  background: transparent;
+  position: absolute;
+  opacity: 0;
   cursor: pointer;
-  position: relative;
-  transition: all 0.2s ease;
 }
 
-.checkboxLabel input[type="checkbox"]:checked {
+.checkboxCustom {
+  width: 18px;
+  height: 18px;
+  border: 1px solid #666;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: transparent;
+}
+
+.checkboxLabel input[type="checkbox"]:checked ~ .checkboxCustom {
   background: var(--color-primary);
   border-color: var(--color-primary);
 }
 
-.checkboxLabel input[type="checkbox"]:checked::after {
+.checkboxLabel input[type="checkbox"]:checked ~ .checkboxCustom::after {
   content: '';
-  position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 5px;
-  height: 10px;
-  border: solid var(--bg-primary);
+  width: 4px;
+  height: 9px;
+  border: solid #000;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+  margin-bottom: 2px;
 }
 
+/* ================= COLORS ================= */
+.colorCircleGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.colorCircleBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.colorCircleBtn:hover {
+  transform: scale(1.1);
+}
+
+/* ================= PRICE ================= */
 .priceRange {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .priceInputs {
@@ -130,48 +273,76 @@
 
 .priceInput {
   flex: 1;
-  background: var(--bg-glass);
+  background: #1e1e1e;
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
-  padding: 0.5rem;
-  color: var(--text-primary);
-  font-size: 0.875rem;
+  padding: 0.75rem;
+  color: #fff;
   width: 100%;
 }
 
 .priceInput:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-dim);
-}
-
-.priceSeparator {
-  color: var(--text-muted);
 }
 
 .applyPriceBtn {
-  width: 100%;
-  background: var(--bg-glass);
-  border: 1px solid var(--color-primary);
-  color: var(--color-primary);
-  padding: 0.5rem;
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 0.75rem;
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s;
 }
 
 .applyPriceBtn:hover {
-  background: var(--color-primary);
-  color: var(--bg-primary);
+  background: #444;
 }
 
-.categoryIcon {
-  width: 16px;
-  height: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* ================= FOOTER ================= */
+.drawerFooter {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #111;
+}
+
+.btnViewItems {
+  width: 100%;
+  padding: 1rem;
+  background: var(--color-primary);
+  color: #000;
+  border: none;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.btnViewItems:hover {
+  filter: brightness(1.1);
+}
+
+.btnClearAlt {
+  width: 100%;
+  padding: 1rem;
+  background: transparent;
+  color: #fff;
+  border: 2px solid #333;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.btnClearAlt:hover {
+  border-color: #666;
 }
 
 .priceInputError {

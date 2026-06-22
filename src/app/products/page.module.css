@@ -14,10 +14,7 @@
 }
 
 .container {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: var(--space-3xl);
-  align-items: start;
+  display: block;
 }
 
 /* ── SIDEBAR FILTER ── */

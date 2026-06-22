@@ -50,6 +50,7 @@ export default function Header() {
   const { data: session } = useSession();
 
   const items = useCartStore((s) => s.items);
+  const openDrawer = useCartStore((s) => s.openDrawer);
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
@@ -183,7 +184,7 @@ export default function Header() {
           </Link>
 
           {/* Cart */}
-          <Link href="/cart" className={styles.cartBtn} id="header-cart" title="Giỏ hàng">
+          <button onClick={openDrawer} className={styles.cartBtn} id="header-cart" title="Giỏ hàng" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
               <path d="M3 6h18"/>
@@ -192,7 +193,7 @@ export default function Header() {
             {mounted && cartCount > 0 && (
               <span className={styles.cartBadge}>{cartCount}</span>
             )}
-          </Link>
+          </button>
 
           {/* Account */}
           {session?.user ? (

@@ -52,7 +52,8 @@ export class ProductService {
       where,
       include: {
         category: true,
-        images: { orderBy: { sortOrder: 'asc' }, take: 1 }
+        images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+        variants: { include: { images: true } }
       },
       orderBy
     });
@@ -93,7 +94,8 @@ export class ProductService {
       where: { isActive: true },
       include: {
         category: true,
-        images: { orderBy: { sortOrder: 'asc' }, take: 1 }
+        images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+        variants: { include: { images: true } }
       }
     });
 
@@ -141,6 +143,7 @@ export class ProductService {
       include: {
         category: true,
         images: { orderBy: { sortOrder: 'asc' } },
+        variants: true,
         reviews: {
           orderBy: { createdAt: 'desc' },
           include: {
@@ -155,7 +158,7 @@ export class ProductService {
    * ADMIN: Create a new product
    */
   static async createProduct(data) {
-    const { name, slug, description, price, salePrice, stock, brand, categoryId, imageUrl, specs } = data;
+    const { name, slug, description, price, salePrice, stock, brand, categoryId, imageUrl, specs, variants } = data;
     
     // Create product
     const product = await prisma.product.create({
@@ -163,25 +166,70 @@ export class ProductService {
         name,
         slug,
         description,
+        baseVariantName: data.baseVariantName || null,
         price: parseFloat(price),
         salePrice: salePrice ? parseFloat(salePrice) : null,
         stock: parseInt(stock),
         brand,
         categoryId,
-        specs,
+        specs: Array.isArray(specs) ? JSON.stringify(specs.filter(s => s.key && s.value)) : (specs || null),
+        features: Array.isArray(data.features) ? JSON.stringify(data.features.filter(f => f.key && f.value)) : (data.features || null),
         isActive: true,
       }
     });
 
-    // Add image if provided
-    if (imageUrl) {
-      await prisma.productImage.create({
-        data: {
-          url: imageUrl,
-          sortOrder: 0,
-          productId: product.id
+    // Add images if provided
+    const imageUrls = data.imageUrls || (data.imageUrl ? [data.imageUrl] : []);
+    for (let i = 0; i < imageUrls.length; i++) {
+      if (imageUrls[i]) {
+        await prisma.productImage.create({
+          data: {
+            url: imageUrls[i],
+            sortOrder: i,
+            productId: product.id
+          }
+        });
+      }
+    }
+
+    // Add variants if provided
+    if (variants && variants.length > 0) {
+      for (const v of variants) {
+        if (!v.name) continue;
+        const variant = await prisma.productVariant.create({
+          data: {
+            productId: product.id,
+            name: v.name,
+            sku: v.sku || null,
+            stock: parseInt(v.stock) || 0,
+            priceOffset: parseFloat(v.priceOffset) || 0,
+            specs: Array.isArray(v.specs) ? JSON.stringify(v.specs.filter(s => s.key && s.value)) : null,
+            features: Array.isArray(v.features) ? JSON.stringify(v.features.filter(f => f.key && f.value)) : null,
+          }
+        });
+        
+        if (v.imageUrls && v.imageUrls.length > 0) {
+          for (let si = 0; si < v.imageUrls.length; si++) {
+            await prisma.productImage.create({
+              data: {
+                url: v.imageUrls[si],
+                sortOrder: si,
+                productId: product.id,
+                variantId: variant.id
+              }
+            });
+          }
+        } else if (v.imageUrl) {
+          await prisma.productImage.create({
+            data: {
+              url: v.imageUrl,
+              sortOrder: 0,
+              productId: product.id,
+              variantId: variant.id
+            }
+          });
         }
-      });
+      }
     }
 
     return product;
@@ -191,18 +239,20 @@ export class ProductService {
    * ADMIN: Update an existing product
    */
   static async updateProduct(id, data) {
-    const { name, slug, description, price, salePrice, stock, brand, categoryId, isActive, imageUrl, specs } = data;
+    const { name, slug, description, price, salePrice, stock, brand, categoryId, isActive, imageUrl, specs, variants } = data;
     
     const updateData = {
       name,
       slug,
       description,
+      baseVariantName: data.baseVariantName || null,
       price: parseFloat(price),
       salePrice: salePrice ? parseFloat(salePrice) : null,
       stock: parseInt(stock),
       brand,
       categoryId,
-      specs,
+      specs: Array.isArray(specs) ? JSON.stringify(specs.filter(s => s.key && s.value)) : (typeof specs === 'string' ? specs : null),
+      features: Array.isArray(data.features) ? JSON.stringify(data.features.filter(f => f.key && f.value)) : (typeof data.features === 'string' ? data.features : null),
       isActive: isActive !== undefined ? isActive : true,
     };
 
@@ -211,29 +261,87 @@ export class ProductService {
       data: updateData
     });
 
-    // Handle image update (simplistic: delete old, add new if provided)
-    if (imageUrl !== undefined) {
-      // Find existing images
-      const existingImages = await prisma.productImage.findMany({ where: { productId: id } });
+    // Handle images update
+    const imageUrls = data.imageUrls || (imageUrl ? [imageUrl] : null);
+    if (imageUrls !== null) {
+      // Delete old base product images (not variant images)
+      await prisma.productImage.deleteMany({ where: { productId: id, variantId: null } });
+      // Create new ones
+      for (let i = 0; i < imageUrls.length; i++) {
+        if (imageUrls[i]) {
+          await prisma.productImage.create({
+            data: {
+              url: imageUrls[i],
+              sortOrder: i,
+              productId: id
+            }
+          });
+        }
+      }
+    }
+
+    // Handle Variants Update
+    if (variants) {
+      // Get existing variants
+      const existingVariants = await prisma.productVariant.findMany({ where: { productId: id } });
       
-      if (imageUrl === '') {
-        // Clear image
-        await prisma.productImage.deleteMany({ where: { productId: id } });
-      } else if (existingImages.length > 0 && existingImages[0].url !== imageUrl) {
-        // Update first image
-        await prisma.productImage.update({
-          where: { id: existingImages[0].id },
-          data: { url: imageUrl }
+      // Delete variants not in incoming list
+      for (const ev of existingVariants) {
+        const match = variants.find(v => (v.id === ev.id) || (v.name === ev.name));
+        if (!match) {
+          await prisma.productVariant.delete({ where: { id: ev.id } });
+        }
+      }
+
+      // Upsert incoming variants
+      for (const v of variants) {
+        if (!v.name) continue;
+        const match = existingVariants.find(ev => (v.id === ev.id) || (v.name === ev.name));
+        let savedVariant;
+        
+        if (match) {
+          savedVariant = await prisma.productVariant.update({
+            where: { id: match.id },
+            data: {
+              name: v.name,
+              sku: v.sku || null,
+              stock: parseInt(v.stock) || 0,
+              priceOffset: parseFloat(v.priceOffset) || 0,
+              specs: Array.isArray(v.specs) ? JSON.stringify(v.specs.filter(s => s.key && s.value)) : null,
+              features: Array.isArray(v.features) ? JSON.stringify(v.features.filter(f => f.key && f.value)) : null,
+            }
+          });
+        } else {
+          savedVariant = await prisma.productVariant.create({
+            data: {
+              productId: id,
+              name: v.name,
+              sku: v.sku || null,
+              stock: parseInt(v.stock) || 0,
+              priceOffset: parseFloat(v.priceOffset) || 0,
+              specs: Array.isArray(v.specs) ? JSON.stringify(v.specs.filter(s => s.key && s.value)) : null,
+              features: Array.isArray(v.features) ? JSON.stringify(v.features.filter(f => f.key && f.value)) : null,
+            }
+          });
+        }
+
+        // Handle variant images (remove old, add new)
+        const variantImageUrls = v.imageUrls || (v.imageUrl ? [v.imageUrl] : []);
+        await prisma.productImage.deleteMany({
+          where: { variantId: savedVariant.id }
         });
-      } else if (existingImages.length === 0 && imageUrl) {
-        // Create new
-        await prisma.productImage.create({
-          data: {
-            url: imageUrl,
-            sortOrder: 0,
-            productId: id
+        for (let si = 0; si < variantImageUrls.length; si++) {
+          if (variantImageUrls[si]) {
+            await prisma.productImage.create({
+              data: {
+                url: variantImageUrls[si],
+                sortOrder: si,
+                productId: id,
+                variantId: savedVariant.id
+              }
+            });
           }
-        });
+        }
       }
     }
 

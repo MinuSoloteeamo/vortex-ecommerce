@@ -8,6 +8,7 @@ import ToastContainer from '@/components/ui/Toast';
 import CartSync from '@/components/providers/CartSync';
 
 import AuthModal from '@/components/auth/AuthModal';
+import CartDrawer from '@/components/cart/CartDrawer';
 
 export const viewport = {
   themeColor: '#0a0a0f',
@@ -41,6 +42,7 @@ export default function RootLayout({ children }) {
           <ToastContainer />
           <CartSync />
           <AuthModal />
+          <CartDrawer />
         </AuthProvider>
       </body>
     </html>

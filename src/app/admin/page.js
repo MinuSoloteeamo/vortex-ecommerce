@@ -3,6 +3,7 @@ import styles from './admin.module.css';
 import DateFilter from './components/DateFilter';
 import RevenueCharts from './components/RevenueCharts';
 import TopCustomers from '@/components/admin/TopCustomers';
+import BehaviorAnalytics from './components/BehaviorAnalytics';
 
 function formatPrice(price) {
   return new Intl.NumberFormat('vi-VN').format(price) + '₫';
@@ -329,6 +330,9 @@ export default async function AdminDashboard({ searchParams }) {
         </div>
       </div>
 
+      {/* ========== BEHAVIOR ANALYTICS ========== */}
+      <BehaviorAnalytics />
+      
       {/* ========== TOP CUSTOMERS ========== */}
       <TopCustomers />
     </div>

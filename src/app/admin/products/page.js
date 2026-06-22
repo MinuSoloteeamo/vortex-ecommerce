@@ -10,6 +10,11 @@ export default async function AdminProducts() {
       include: {
         category: true,
         images: true,
+        variants: {
+          include: {
+            images: { orderBy: { sortOrder: 'asc' } }
+          }
+        },
       }
     }),
     prisma.category.findMany({

@@ -113,6 +113,10 @@
   gap: var(--space-lg);
 }
 
+.radioGroup input[type="radio"] {
+  accent-color: var(--color-primary);
+}
+
 .radioLabel {
   display: flex;
   align-items: center;
