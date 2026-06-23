@@ -230,7 +230,22 @@ export default function CheckoutPage() {
         throw new Error(data.message || 'Đã xảy ra lỗi khi đặt hàng');
       }
 
-      // Success
+      // Nếu thanh toán bằng VNPay
+      if (paymentMethod === 'VNPAY') {
+        const vnpayRes = await fetch('/api/vnpay/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: data.orderId })
+        });
+        const vnpayData = await vnpayRes.json();
+        if (vnpayData.url) {
+          clearCart();
+          window.location.href = vnpayData.url;
+          return;
+        }
+      }
+
+      // Success (COD)
       setIsOrderSuccess(true);
       clearCart();
       router.push(`/checkout/success/${data.orderId}`);
@@ -431,20 +446,20 @@ export default function CheckoutPage() {
                   </div>
                 </label>
 
-                <label className={`${styles.optionCard} ${paymentMethod === 'BANK_TRANSFER' ? styles.optionCardActive : ''}`}>
+                <label className={`${styles.optionCard} ${paymentMethod === 'VNPAY' ? styles.optionCardActive : ''}`}>
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="BANK_TRANSFER"
-                    checked={paymentMethod === 'BANK_TRANSFER'}
+                    value="VNPAY"
+                    checked={paymentMethod === 'VNPAY'}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     style={{ display: 'none' }}
                   />
                   <div className={styles.optionContent}>
                     <div className={styles.optionHeader}>
-                      <span className={styles.optionName}>🏦 Chuyển khoản</span>
+                      <span className={styles.optionName}>🏦 VNPAY</span>
                     </div>
-                    <span className={styles.optionDesc}>Quét mã QR qua ứng dụng ngân hàng</span>
+                    <span className={styles.optionDesc}>Quét mã QR qua app ngân hàng / VNPAY</span>
                   </div>
                 </label>
               </div>

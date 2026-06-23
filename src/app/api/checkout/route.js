@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { createAdminNotification } from '@/lib/notification';
 import crypto from 'crypto';
+import { sendOrderConfirmationEmail } from '@/lib/mail';
 
 function generateOrderNumber() {
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -272,6 +273,20 @@ export async function POST(req) {
         'VIP_UPGRADE',
         '/account/vip'
       );
+    }
+
+    // Send email for COD
+    if (paymentMethod === 'COD') {
+      const orderItemsForEmail = finalOrderItems.map(item => {
+        const dbProduct = dbProducts.find(p => p.id === item.productId);
+        return {
+          ...item,
+          product: { name: dbProduct?.name || 'Sản phẩm' }
+        };
+      });
+      if (user.email) {
+        sendOrderConfirmationEmail(user.email, order, orderItemsForEmail).catch(console.error);
+      }
     }
 
     return NextResponse.json({ 
