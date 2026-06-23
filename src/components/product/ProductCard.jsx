@@ -127,7 +127,7 @@ export default function ProductCard({ product, initialWishlisted = false }) {
       </Link>
       
       <div className={styles.productActions}>
-         <AddToCartButton product={cartProduct} fullWidth={true} />
+         <AddToCartButton product={cartProduct} variant={selectedVariant} fullWidth={true} />
       </div>
     </div>
   );
