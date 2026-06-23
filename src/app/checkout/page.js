@@ -475,9 +475,11 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.id} className={styles.summaryItem}>
                     <div className={styles.itemImage}>
-                      {item.images?.[0]?.url ? (
-                        <img src={item.images[0].url} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : '📦'}
+                      {item.image && item.image.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i) ? (
+                        <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <span style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>{item.image || '📦'}</span>
+                      )}
                     </div>
                     <div className={styles.itemDetails}>
                       <div className={styles.itemName}>{item.name}</div>
