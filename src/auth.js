@@ -1,7 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import FacebookProvider from 'next-auth/providers/facebook';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { authConfig } from './auth.config';
 import { prisma } from '@/lib/prisma';
@@ -14,10 +13,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || 'mock-client-id',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'mock-client-secret',
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID || 'mock-client-id',
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || 'mock-client-secret',
     }),
     CredentialsProvider({
       name: 'Credentials',

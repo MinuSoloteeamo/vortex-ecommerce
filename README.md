@@ -20,7 +20,7 @@ VORTEX là một nền tảng thương mại điện tử hiện đại, chuyên
   * Giỏ hàng sử dụng Zustand, tự động lưu (persist) qua local storage tích hợp UI Slider mượt mà.
   * Tìm kiếm thông minh: Gợi ý tức thì (autocomplete) theo danh mục và sản phẩm. Hỗ trợ **tìm kiếm tiếng Việt không dấu** (gõ "chuot" vẫn tìm ra "Chuột Gaming").
 * **Thanh toán & Đăng nhập (Authentication):**
-  * Tích hợp NextAuth hoàn chỉnh, hỗ trợ **Đăng nhập/Đăng ký một chạm qua Google và Facebook** tiện lợi. Đăng nhập truyền thống an toàn với mật khẩu băm.
+  * Tích hợp NextAuth hoàn chỉnh, hỗ trợ **Đăng nhập/Đăng ký một chạm qua Google** tiện lợi. Đăng nhập truyền thống an toàn với mật khẩu băm.
   * **Ràng buộc đăng nhập:** Bắt buộc người dùng đăng nhập mới có thể tiến hành thanh toán, chuyển hướng cực thông minh với cơ chế `callbackUrl`.
   * Hỗ trợ tính năng mã giảm giá, tính phí vận chuyển theo cấp bậc hạng VIP.
 * **AI & Thông minh & Hệ thống:**
