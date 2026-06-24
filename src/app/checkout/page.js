@@ -212,6 +212,7 @@ export default function CheckoutPage() {
         paymentMethod,
         items: items.map(item => ({
           productId: item.id,
+          variantId: item.variantId || null,
           quantity: item.quantity,
           price: item.salePrice || item.price,
         })),

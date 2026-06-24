@@ -74,7 +74,22 @@ export async function POST(req) {
         variantName = variant.name;
       } else {
         if (dbProduct.stock < item.quantity) {
-          return NextResponse.json({ message: `Sản phẩm hết hàng: ${dbProduct.name}` }, { status: 400 });
+          // Base product out of stock — check if any variant has stock
+          const availableVariants = await prisma.productVariant.findMany({
+            where: { productId: item.productId, stock: { gte: item.quantity } },
+            orderBy: { createdAt: 'desc' },
+            take: 1
+          });
+
+          if (availableVariants.length > 0) {
+            // Auto-fallback to the available variant
+            const fallbackVariant = availableVariants[0];
+            variantId = fallbackVariant.id;
+            variantName = fallbackVariant.name;
+            priceToUse += fallbackVariant.priceOffset;
+          } else {
+            return NextResponse.json({ message: `Sản phẩm hết hàng: ${dbProduct.name}` }, { status: 400 });
+          }
         }
       }
 
