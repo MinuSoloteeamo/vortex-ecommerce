@@ -63,17 +63,23 @@ export default async function CheckoutSuccessPage({ params }) {
           {/* Icon */}
           <div style={{ 
             width: '80px', height: '80px', 
-            background: 'var(--bg-card)', 
+            background: order.paymentStatus === 'PAID' ? 'var(--color-success, #00C853)' : 'var(--bg-card)', 
             borderRadius: '50%', 
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto var(--space-lg)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-            color: 'var(--color-primary)'
+            boxShadow: order.paymentStatus === 'PAID' ? '0 0 20px rgba(0, 200, 83, 0.4)' : '0 4px 12px rgba(0,0,0,0.5)',
+            color: order.paymentStatus === 'PAID' ? '#000' : 'var(--color-primary)'
           }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
+            {order.paymentStatus === 'PAID' ? (
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            ) : (
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            )}
           </div>
           
           <h1 style={{ 
@@ -82,7 +88,7 @@ export default async function CheckoutSuccessPage({ params }) {
             color: 'var(--text-primary)',
             marginBottom: 'var(--space-md)'
           }}>
-            Đang chờ thanh toán
+            {order.paymentStatus === 'PAID' ? 'Thanh toán thành công' : 'Đang chờ thanh toán'}
           </h1>
           
           <div style={{ 
@@ -93,11 +99,23 @@ export default async function CheckoutSuccessPage({ params }) {
             maxWidth: '600px',
             margin: '0 auto var(--space-xl)'
           }}>
-            <p style={{ color: 'var(--color-danger, #ff3366)', fontWeight: 'bold', marginBottom: 'var(--space-xs)' }}>
-              ⚠️ Để tránh mất tiền vào tay kẻ lừa đảo mạo danh Shipper, bạn tuyệt đối:
-            </p>
-            <p>KHÔNG chuyển khoản cho Shipper khi chưa nhận hàng</p>
-            <p>KHÔNG nhấn vào đường dẫn (Link) lạ của Shipper gửi</p>
+            {order.paymentStatus === 'PAID' ? (
+              <>
+                <p style={{ color: 'var(--color-success, #00C853)', fontWeight: 'bold', marginBottom: 'var(--space-xs)', fontSize: '1.1rem' }}>
+                  Cảm ơn bạn đã mua sắm tại VORTEX!
+                </p>
+                <p>Đơn hàng của bạn đã được thanh toán an toàn qua VNPAY.</p>
+                <p>Hóa đơn điện tử chi tiết đã được gửi về email của bạn.</p>
+              </>
+            ) : (
+              <>
+                <p style={{ color: 'var(--color-danger, #ff3366)', fontWeight: 'bold', marginBottom: 'var(--space-xs)' }}>
+                  ⚠️ Để tránh mất tiền vào tay kẻ lừa đảo mạo danh Shipper, bạn tuyệt đối:
+                </p>
+                <p>KHÔNG chuyển khoản cho Shipper khi chưa nhận hàng</p>
+                <p>KHÔNG nhấn vào đường dẫn (Link) lạ của Shipper gửi</p>
+              </>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', maxWidth: '500px', margin: '0 auto' }}>

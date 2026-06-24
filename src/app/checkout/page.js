@@ -617,8 +617,30 @@ export default function CheckoutPage() {
               Số tiền: <strong style={{ color: 'var(--color-danger)', fontSize: '1.5rem' }}>{formatPrice(mockVnpay.amount)}</strong>
             </p>
             
-            <div style={{ background: 'white', padding: '1rem', borderRadius: '10px', display: 'inline-block', marginBottom: '2rem' }}>
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VNPAY-${mockVnpay.orderId}`} alt="QR Code" style={{ width: '200px', height: '200px' }} />
+            <div style={{ 
+              background: 'white', 
+              padding: '1.5rem', 
+              borderRadius: '16px', 
+              display: 'inline-block', 
+              marginBottom: '2rem',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+              border: '2px solid #005baa' // VNPAY Blue
+            }}>
+              <div style={{ color: '#005baa', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '10px' }}>VNPAY<sup style={{ color: '#ff0000' }}>QR</sup></div>
+              
+              {/* Sếp chỉ cần lưu ảnh QR thật vào thư mục public/images/ với tên my-vnpay-qr.png */}
+              <img 
+                src="/images/my-vnpay-qr.png" 
+                onError={(e) => { 
+                  e.target.onerror = null; 
+                  e.target.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VNPAY-${mockVnpay.orderId}`;
+                }} 
+                alt="QR Code" 
+                style={{ width: '200px', height: '200px', objectFit: 'contain' }} 
+              />
+              <div style={{ color: '#333', fontSize: '0.85rem', marginTop: '10px', fontWeight: '500' }}>
+                Sử dụng <b>App Ngân hàng</b> hoặc <b>Ví điện tử</b> để quét mã
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
