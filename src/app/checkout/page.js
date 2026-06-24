@@ -617,29 +617,28 @@ export default function CheckoutPage() {
               Số tiền: <strong style={{ color: 'var(--color-danger)', fontSize: '1.5rem' }}>{formatPrice(mockVnpay.amount)}</strong>
             </p>
             
-            <div style={{ 
-              background: 'white', 
-              padding: '1.5rem', 
-              borderRadius: '16px', 
-              display: 'inline-block', 
-              marginBottom: '2rem',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-              border: '2px solid #005baa' // VNPAY Blue
-            }}>
-              <div style={{ color: '#005baa', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '10px' }}>VNPAY<sup style={{ color: '#ff0000' }}>QR</sup></div>
-              
-              {/* Sếp chỉ cần lưu ảnh QR thật vào thư mục public/images/ với tên my-vnpay-qr.png */}
-              <img 
-                src="/images/my-vnpay-qr.png" 
-                onError={(e) => { 
-                  e.target.onerror = null; 
-                  e.target.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VNPAY-${mockVnpay.orderId}`;
-                }} 
-                alt="QR Code" 
-                style={{ width: '200px', height: '200px', objectFit: 'contain' }} 
-              />
-              <div style={{ color: '#333', fontSize: '0.85rem', marginTop: '10px', fontWeight: '500' }}>
-                Sử dụng <b>App Ngân hàng</b> hoặc <b>Ví điện tử</b> để quét mã
+            <div style={{ textAlign: 'center', width: '100%' }}>
+              <div style={{ 
+                background: 'white', 
+                padding: '1rem', 
+                borderRadius: '16px', 
+                display: 'inline-block', 
+                marginBottom: '2rem',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+                border: '2px solid #005baa' // VNPAY Blue
+              }}>
+                <div style={{ color: '#005baa', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '10px' }}>Quét mã thanh toán</div>
+                
+                {/* Dùng VietQR API: Tạo mã QR NH thật, quét bằng mọi app ngân hàng! */}
+                {/* Sếp có thể thay 'MB' và '0399901019' thành ngân hàng và STK của sếp */}
+                <img 
+                  src={`https://img.vietqr.io/image/MB-0399901019-compact.png?amount=${mockVnpay.amount}&addInfo=VORTEX ${mockVnpay.orderNumber}&accountName=VORTEX STORE`} 
+                  alt="QR Code" 
+                  style={{ width: '250px', height: 'auto', objectFit: 'contain', margin: '0 auto', display: 'block' }} 
+                />
+                <div style={{ color: '#333', fontSize: '0.85rem', marginTop: '10px', fontWeight: '500' }}>
+                  Sử dụng <b>App Ngân hàng</b> hoặc <b>Ví điện tử</b> để quét mã
+                </div>
               </div>
             </div>
 
@@ -656,9 +655,11 @@ export default function CheckoutPage() {
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ orderId: mockVnpay.orderId })
                     });
+                    const currentOrderId = mockVnpay.orderId;
                     setMockVnpay({ show: false, orderId: null, amount: 0, orderNumber: '' });
                     clearCart();
                     setIsOrderSuccess(true);
+                    router.push(`/checkout/success/${currentOrderId}`);
                   } catch (e) {
                     console.error(e);
                     alert('Lỗi thanh toán demo');
