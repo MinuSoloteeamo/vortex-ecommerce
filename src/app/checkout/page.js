@@ -40,6 +40,7 @@ export default function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
   const [isCouponLoading, setIsCouponLoading] = useState(false);
+  const [mockVnpay, setMockVnpay] = useState({ show: false, orderId: null, amount: 0, orderNumber: '' });
 
   // Location API State
   const [locationData, setLocationData] = useState([]);
@@ -233,17 +234,14 @@ export default function CheckoutPage() {
 
       // Nếu thanh toán bằng VNPay
       if (paymentMethod === 'VNPAY') {
-        const vnpayRes = await fetch('/api/vnpay/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: data.orderId })
+        setMockVnpay({
+          show: true,
+          orderId: data.orderId,
+          orderNumber: data.orderNumber,
+          amount: totalAfterDiscounts + shippingFee,
         });
-        const vnpayData = await vnpayRes.json();
-        if (vnpayData.url) {
-          clearCart();
-          window.location.href = vnpayData.url;
-          return;
-        }
+        setIsLoading(false);
+        return;
       }
 
       // Success (COD)
@@ -604,6 +602,64 @@ export default function CheckoutPage() {
 
             <div style={{ marginTop: '2rem', textAlign: 'right' }}>
               <button type="button" className="btn btn-secondary" onClick={() => setShowAddressModal(false)}>Đóng</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mock VNPay Modal */}
+      {mockVnpay.show && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: 'var(--radius-xl)', width: '90%', maxWidth: '400px', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
+            <h2 style={{ marginBottom: '1rem', color: 'var(--color-primary)' }}>Thanh toán VNPAY (Demo)</h2>
+            <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
+              Mã đơn: <strong>{mockVnpay.orderNumber}</strong><br/>
+              Số tiền: <strong style={{ color: 'var(--color-danger)', fontSize: '1.5rem' }}>{formatPrice(mockVnpay.amount)}</strong>
+            </p>
+            
+            <div style={{ background: 'white', padding: '1rem', borderRadius: '10px', display: 'inline-block', marginBottom: '2rem' }}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VNPAY-${mockVnpay.orderId}`} alt="QR Code" style={{ width: '200px', height: '200px' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+              <button 
+                type="button"
+                className="btn btn-primary"
+                disabled={isLoading}
+                onClick={async () => {
+                  setIsLoading(true);
+                  try {
+                    await fetch('/api/vnpay/mock-pay', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ orderId: mockVnpay.orderId })
+                    });
+                    setMockVnpay({ show: false, orderId: null, amount: 0, orderNumber: '' });
+                    clearCart();
+                    setIsOrderSuccess(true);
+                  } catch (e) {
+                    console.error(e);
+                    alert('Lỗi thanh toán demo');
+                  }
+                  setIsLoading(false);
+                }}
+              >
+                {isLoading ? 'Đang xử lý...' : 'Giả lập thanh toán thành công'}
+              </button>
+              <button 
+                type="button"
+                className="btn btn-secondary"
+                disabled={isLoading}
+                onClick={() => {
+                  setMockVnpay({ show: false, orderId: null, amount: 0, orderNumber: '' });
+                  setIsLoading(false);
+                  alert('Đơn hàng đã được tạo nhưng chưa thanh toán. Bạn có thể thanh toán sau trong trang Quản lý đơn hàng.');
+                  clearCart();
+                  router.push('/profile?tab=orders');
+                }}
+              >
+                Hủy thanh toán
+              </button>
             </div>
           </div>
         </div>
