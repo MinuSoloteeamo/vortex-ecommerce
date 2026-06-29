@@ -18,7 +18,8 @@ export default function OrderManagerClient({ orders }) {
 
   // Tách đơn hàng ra
   const activeOrders = orders.filter(o => ['PENDING', 'PROCESSING', 'SHIPPING'].includes(o.status));
-  const historyOrders = orders.filter(o => ['DELIVERED', 'FAILED_DELIVERY', 'CANCELLED'].includes(o.status));
+  const historyOrders = orders.filter(o => ['DELIVERED', 'FAILED_DELIVERY'].includes(o.status));
+  const cancelledOrders = orders.filter(o => o.status === 'CANCELLED');
 
   // Logic lọc lịch sử
   const filteredHistory = useMemo(() => {
@@ -85,6 +86,21 @@ export default function OrderManagerClient({ orders }) {
           }}
         >
           Lịch sử Đơn Hàng
+        </button>
+        <button 
+          onClick={() => setActiveTab('cancel')}
+          style={{ 
+            padding: '12px 24px', 
+            background: 'none', 
+            border: 'none', 
+            borderBottom: activeTab === 'cancel' ? '2px solid var(--color-danger)' : '2px solid transparent',
+            color: activeTab === 'cancel' ? 'var(--color-danger)' : 'var(--text-muted)',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            fontSize: '16px'
+          }}
+        >
+          Xử lý Đơn Hủy ({cancelledOrders.length})
         </button>
       </div>
 
@@ -188,6 +204,67 @@ export default function OrderManagerClient({ orders }) {
                     <td style={{ maxWidth: '250px' }}>
                       <div style={{ fontSize: 'var(--font-size-sm)' }}>{order.shippingAddress}</div>
                       {order.cancelReason && <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-danger)', marginTop: '4px' }}>Lý do: {order.cancelReason}</div>}
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 'bold' }}>{formatPrice(order.totalAmount)}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{order.paymentMethod}</div>
+                    </td>
+                    <td>
+                      <OrderStatusSelect orderId={order.id} currentStatus={order.status} />
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === 'cancel' && (
+        <div className={styles.card}>
+          <h2 style={{ marginBottom: '1rem', color: 'var(--color-danger)' }}>Danh sách Đơn Hủy</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Mã Đơn</th>
+                <th>Khách Hàng</th>
+                <th>Thông Tin Giao Hàng & Lý do</th>
+                <th>Tổng Tiền</th>
+                <th>Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cancelledOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-muted)' }}>
+                    Không có đơn hàng nào bị hủy
+                  </td>
+                </tr>
+              ) : (
+                cancelledOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td style={{ fontFamily: 'monospace', color: 'var(--text-primary)' }}>
+                      <div>{order.orderNumber}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{new Date(order.createdAt).toLocaleString('vi-VN')}</div>
+                    </td>
+                    <td>
+                      <div><strong>{order.recipientName}</strong></div>
+                      <div style={{ fontSize: 'var(--font-size-xs)' }}>{order.recipientPhone}</div>
+                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{order.user?.email}</div>
+                    </td>
+                    <td style={{ maxWidth: '300px' }}>
+                      <div style={{ fontSize: 'var(--font-size-sm)' }}>{order.shippingAddress}</div>
+                      <div style={{ 
+                        fontSize: 'var(--font-size-sm)', 
+                        color: '#b91c1c', 
+                        marginTop: '8px', 
+                        padding: '8px', 
+                        background: '#fee2e2', 
+                        borderRadius: '6px',
+                        borderLeft: '4px solid #ef4444'
+                      }}>
+                        <strong>Lý do hủy:</strong> {order.cancelReason || 'Không có lý do'}
+                      </div>
                     </td>
                     <td>
                       <div style={{ fontWeight: 'bold' }}>{formatPrice(order.totalAmount)}</div>

@@ -61,12 +61,16 @@ export default function CartPage() {
           <div className={styles.itemsList}>
             {items.map((item) => {
               const itemPrice = item.salePrice || item.price;
-              const imageSrc = item.images?.[0]?.url || '📦';
+              const imageSrc = item.image; // Trong store cart, URL ảnh được lưu ở thuộc tính 'image'
 
               return (
                 <div key={item.id} className={styles.cartItem}>
                   <Link href={`/products/${item.slug}`} className={styles.itemImage}>
-                    <span className={styles.emoji}>{imageSrc}</span>
+                    {imageSrc && imageSrc !== '📦' && !imageSrc.includes('📦') ? (
+                      <img src={imageSrc} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+                    ) : (
+                      <span className={styles.emoji}>📦</span>
+                    )}
                   </Link>
                   
                   <div className={styles.itemInfo}>

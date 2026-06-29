@@ -30,6 +30,20 @@ export default function OrdersPage() {
 
   const [reviewModal, setReviewModal] = useState({ isOpen: false, orderId: null, product: null });
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [reviewedProductIds, setReviewedProductIds] = useState([]);
+
+  const [cancelModal, setCancelModal] = useState({ isOpen: false, orderId: null });
+  const [cancelReason, setCancelReason] = useState('');
+  const [customReason, setCustomReason] = useState('');
+
+  const CANCEL_REASONS = [
+    'Muốn thay đổi địa chỉ giao hàng',
+    'Muốn thay đổi sản phẩm/màu sắc',
+    'Tìm thấy giá rẻ hơn ở nơi khác',
+    'Đổi ý, không muốn mua nữa',
+    'Thay đổi phương thức thanh toán',
+    'Khác'
+  ];
 
   const tabs = [
     { id: 'ALL', label: 'Tất cả' },
@@ -49,12 +63,44 @@ export default function OrdersPage() {
     try {
       const res = await fetch(`/api/user/orders?status=${status}`);
       if (res.ok) {
-        setOrders(await res.json());
+        const data = await res.json();
+        setOrders(data.orders || []);
+        setReviewedProductIds(data.reviewedProductIds || []);
       }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openCancelModal = (orderId) => {
+    setCancelModal({ isOpen: true, orderId });
+    setCancelReason('');
+    setCustomReason('');
+  };
+
+  const submitCancelOrder = async () => {
+    const finalReason = cancelReason === 'Khác' ? customReason : cancelReason;
+    if (!finalReason) {
+      useToastStore.getState().error('Vui lòng chọn lý do hủy');
+      return;
+    }
+    try {
+      const res = await fetch('/api/user/orders/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: cancelModal.orderId, reason: finalReason })
+      });
+      if (res.ok) {
+        useToastStore.getState().success('Đã hủy đơn hàng thành công');
+        setCancelModal({ isOpen: false, orderId: null });
+        fetchOrders(activeTab); // refresh list
+      } else {
+        useToastStore.getState().error('Lỗi khi hủy đơn hàng');
+      }
+    } catch (e) {
+      useToastStore.getState().error('Lỗi hệ thống');
     }
   };
 
@@ -73,6 +119,7 @@ export default function OrdersPage() {
       });
       if (res.ok) {
         useToastStore.getState().success('Đánh giá thành công! Cảm ơn bạn. ❤️');
+        setReviewedProductIds([...reviewedProductIds, reviewModal.product.id]);
         setReviewModal({ isOpen: false, orderId: null, product: null });
         setReviewForm({ rating: 5, comment: '' });
       } else {
@@ -160,13 +207,19 @@ export default function OrdersPage() {
                       <div className={styles.itemPrice}>{formatPrice(item.price)}</div>
                       
                       {order.status === 'DELIVERED' && (
-                        <button 
-                          className="btn btn-outline" 
-                          style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', marginTop: '0.5rem' }}
-                          onClick={() => setReviewModal({ isOpen: true, orderId: order.id, product: item.product })}
-                        >
-                          Đánh giá
-                        </button>
+                        reviewedProductIds.includes(item.product.id) ? (
+                          <div style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', marginTop: '0.5rem', color: 'var(--color-success)', border: '1px solid var(--color-success)', borderRadius: 'var(--radius-sm)', display: 'inline-block' }}>
+                            Đã đánh giá ✓
+                          </div>
+                        ) : (
+                          <button 
+                            className="btn btn-outline" 
+                            style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', marginTop: '0.5rem' }}
+                            onClick={() => setReviewModal({ isOpen: true, orderId: order.id, product: item.product })}
+                          >
+                            Đánh giá
+                          </button>
+                        )
                       )}
                     </div>
                   </div>
@@ -175,7 +228,18 @@ export default function OrdersPage() {
 
               <div className={styles.orderFooter}>
                 <div className={styles.totalLabel}>Tổng tiền:</div>
-                <div className={styles.totalValue}>{formatPrice(order.totalAmount)}</div>
+                <div className={styles.totalValue} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  {formatPrice(order.totalAmount)}
+                  {order.status === 'PENDING' && (
+                    <button 
+                      className="btn btn-outline" 
+                      style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', borderColor: 'var(--color-danger)', color: 'var(--color-danger)' }}
+                      onClick={() => openCancelModal(order.id)}
+                    >
+                      Hủy đơn
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -222,9 +286,64 @@ export default function OrdersPage() {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setReviewModal({ isOpen: false, orderId: null, product: null })}>Trở lại</button>
-                <button type="submit" className="btn btn-primary">Hoàn thành</button>
               </div>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Gửi đánh giá</button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Modal Cute */}
+      {cancelModal.isOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal} style={{ maxWidth: '400px', textAlign: 'center' }}>
+            <div style={{ fontSize: '4rem', marginBottom: '0.5rem', lineHeight: '1' }}>🥺</div>
+            <h2 style={{ marginBottom: '0.5rem', fontSize: '1.25rem' }}>Tại sao bạn lại hủy đơn?</h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Vortex sẽ rất buồn nếu bạn rời đi...</p>
+            
+            <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              {CANCEL_REASONS.map(reason => (
+                <label key={reason} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', padding: '0.75rem', border: '1px solid', borderColor: cancelReason === reason ? 'var(--color-primary)' : 'var(--border-subtle)', borderRadius: 'var(--radius-md)', background: cancelReason === reason ? 'var(--bg-card-hover)' : 'transparent', transition: 'all 0.2s ease' }}>
+                  <input 
+                    type="radio" 
+                    name="cancelReason" 
+                    value={reason}
+                    checked={cancelReason === reason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    style={{ accentColor: 'var(--color-primary)', width: '18px', height: '18px' }}
+                  />
+                  <span style={{ fontSize: '0.9rem' }}>{reason}</span>
+                </label>
+              ))}
+              
+              {cancelReason === 'Khác' && (
+                <textarea 
+                  className="input"
+                  placeholder="Nhập lý do của bạn để chúng mình cải thiện nhé..."
+                  rows="3"
+                  value={customReason}
+                  onChange={(e) => setCustomReason(e.target.value)}
+                  style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}
+                />
+              )}
+            </div>
+            
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button 
+                className="btn btn-outline" 
+                style={{ flex: 1, padding: '0.75rem' }}
+                onClick={() => setCancelModal({ isOpen: false, orderId: null })}
+              >
+                Không hủy nữa
+              </button>
+              <button 
+                className="btn btn-primary" 
+                style={{ flex: 1, padding: '0.75rem', background: 'var(--color-danger)', borderColor: 'var(--color-danger)', color: '#fff' }}
+                onClick={submitCancelOrder}
+              >
+                Xác nhận hủy
+              </button>
+            </div>
           </div>
         </div>
       )}

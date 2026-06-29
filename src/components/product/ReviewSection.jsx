@@ -73,75 +73,52 @@ export default function ReviewSection({ productId, initialReviews, totalCount, a
       </div>
 
       {session ? (
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <h3 className={styles.formTitle}>Viết đánh giá của bạn</h3>
-          
-          {error && <div className={styles.error}>{error}</div>}
-          
-          <div className={styles.ratingSelect}>
-            <span>Chọn mức độ:</span>
-            <div className={styles.starSelect}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button 
-                  key={star} 
-                  type="button"
-                  className={`${styles.starBtn} ${rating >= star ? styles.activeStar : ''}`}
-                  onClick={() => setRating(star)}
-                >
-                  ★
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <textarea 
-            className={styles.textarea}
-            placeholder="Chia sẻ cảm nhận của bạn về sản phẩm này..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            rows={4}
-            required
-          />
-          
-          <button 
-            type="submit" 
-            className={`btn btn-primary ${styles.submitBtn}`}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Đang gửi...' : 'Gửi đánh giá'}
-          </button>
-        </form>
+        <div style={{ marginTop: 'var(--space-xl)', padding: 'var(--space-lg)', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-subtle)', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>
+            Bạn có thể để lại đánh giá cho sản phẩm này sau khi mua và nhận hàng thành công tại mục <a href="/account/orders" style={{ color: 'var(--color-primary)', fontWeight: 'bold', textDecoration: 'underline' }}>Quản lý đơn hàng</a>.
+          </p>
+        </div>
       ) : (
-        <div className={styles.loginPrompt}>
-          Vui lòng <button onClick={() => useAuthModalStore.getState().openModal('login')} className={styles.link} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', padding: 0 }}>Đăng nhập</button> để gửi đánh giá.
+        <div style={{ marginTop: 'var(--space-xl)', padding: 'var(--space-lg)', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>Vui lòng đăng nhập để xem chi tiết và đánh giá sản phẩm.</p>
+          <button className="btn btn-outline" style={{ marginTop: '1rem' }} onClick={() => useAuthModalStore.getState().open()}>
+            Đăng nhập ngay
+          </button>
         </div>
       )}
 
       <div className={styles.reviewList}>
         {reviews.length === 0 ? (
-          <div className={styles.noReviews}>Chưa có đánh giá nào cho sản phẩm này.</div>
+          <div className={styles.emptyReviews}>
+            Chưa có đánh giá nào cho sản phẩm này.
+          </div>
         ) : (
-          reviews.map(review => (
-            <div key={review.id} className={styles.reviewItem}>
-              <div className={styles.reviewAvatar}>
-                {review.user?.avatar ? (
-                  <img src={review.user.avatar} alt={review.user.name} />
-                ) : (
-                  <span>{review.user?.name?.[0] || 'U'}</span>
-                )}
-              </div>
-              <div className={styles.reviewContent}>
-                <div className={styles.reviewHeader}>
-                  <strong className={styles.reviewerName}>{review.user?.name}</strong>
-                  <span className={styles.reviewDate}>{new Date(review.createdAt).toLocaleDateString('vi-VN')}</span>
+          reviews.map(review => {
+            const safeRating = Math.max(0, Math.min(5, Number(review.rating) || 5));
+            return (
+              <div key={review.id} className={styles.reviewItem}>
+                <div className={styles.reviewMeta}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <img 
+                      src={review.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.user?.name || 'U')}&background=random`} 
+                      alt="avatar" 
+                      style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                    <div>
+                      <strong style={{ display: 'block', fontSize: '0.95rem' }}>{review.user?.name || 'Khách hàng'}</strong>
+                      <div className={styles.reviewDate}>
+                        {new Date(review.createdAt).toLocaleDateString('vi-VN')}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.reviewStars}>
+                    {'★'.repeat(safeRating)}{'☆'.repeat(5 - safeRating)}
+                  </div>
                 </div>
-                <div className={styles.reviewStars}>
-                  {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                </div>
-                <p className={styles.reviewText}>{review.comment}</p>
+                <p className={styles.reviewComment}>{review.comment}</p>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

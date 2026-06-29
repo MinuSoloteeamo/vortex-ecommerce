@@ -1,0 +1,148 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>Báo Cáo Tiến Độ</title>
+<style>
+  body { font-family: "Times New Roman", Times, serif; font-size: 14pt; line-height: 1.5; }
+  h1 { text-align: center; font-size: 16pt; text-transform: uppercase; margin-bottom: 20px; }
+  h2 { font-size: 14pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  th, td { border: 1px solid black; padding: 8px; text-align: left; vertical-align: top; }
+  th { font-weight: bold; text-align: center; }
+  ul { margin-top: 0; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<h1>BÁO CÁO TIẾN ĐỘ BÀI TẬP NHÓM 2 - TUẦN 5</h1>
+
+<h2>I. Thông tin chung</h2>
+<ul>
+  <li><b>Tên môn học:</b> Thương Mại Điện Tử</li>
+  <li><b>Tên đề tài/Dự án:</b> Xây dựng Website Thương Mại Điện Tử bán thiết bị điện tử, phụ kiện công nghệ (Vortex)</li>
+  <li><b>Tên nhóm:</b> Nhóm 2 - <b>Nhóm trưởng:</b> Nguyễn Tiến Minh</li>
+  <li><b>Thời gian báo cáo:</b> 27/6</li>
+</ul>
+
+<h2>II. Tình trạng chung</h2>
+<ul>
+  <li><b>Tiến độ tổng thể:</b> Đúng hạn</li>
+  <li><b>Mức độ hoàn thành dự án:</b> 80%</li>
+  <li><b>Nhận xét tóm tắt:</b> Nhóm hoạt động tích cực, bám sát kế hoạch. Các tính năng cốt lõi của website như quản lý giỏ hàng, đặt hàng, gửi hóa đơn email và giả lập thanh toán online bằng mã QR đã được hoàn thiện.</li>
+</ul>
+
+<h2>III. Công việc đã thực hiện trong tuần</h2>
+<p><i>Bảng này giúp theo dõi xem ai đã làm gì và kết quả ra sao.</i></p>
+<table>
+  <tr>
+    <th style="width: 5%;">STT</th>
+    <th style="width: 35%;">Tên công việc (Task)</th>
+    <th style="width: 20%;">Người thực hiện</th>
+    <th style="width: 15%;">Tỷ lệ hoàn thành</th>
+    <th style="width: 25%;">Kết quả / Ghi chú</th>
+  </tr>
+  <tr>
+    <td style="text-align: center;">1</td>
+    <td>Thu thập số liệu chương 1</td>
+    <td>Trương Anh Khoa</td>
+    <td style="text-align: center;">100%</td>
+    <td>Đã xong</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;">2</td>
+    <td>Viết dàn ý chương 2</td>
+    <td>Lương Vũ Xuân Đạt</td>
+    <td style="text-align: center;">100%</td>
+    <td>Chờ duyệt để viết chi tiết</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;">3</td>
+    <td>Thiết kế khung Slide</td>
+    <td>Nguyễn Tiến Minh</td>
+    <td style="text-align: center;">100%</td>
+    <td>Đã hoàn thiện</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;">4</td>
+    <td>Hoàn thiện luồng mua hàng, tích hợp thanh toán VietQR và tự động gửi Email hóa đơn cho khách.</td>
+    <td>Nguyễn Tiến Minh</td>
+    <td style="text-align: center;">100%</td>
+    <td>Website đã có thể thực hiện thanh toán demo sát thực tế.</td>
+  </tr>
+</table>
+
+<h2>IV. Kế hoạch công việc tuần tiếp theo</h2>
+<p><i>Phân công rõ ràng để mọi người biết nhiệm vụ sắp tới của mình.</i></p>
+<table>
+  <tr>
+    <th style="width: 5%;">STT</th>
+    <th style="width: 45%;">Tên công việc cần làm</th>
+    <th style="width: 20%;">Người phụ trách</th>
+    <th style="width: 15%;">Hạn chót (Deadline)</th>
+    <th style="width: 15%;">Mức độ ưu tiên</th>
+  </tr>
+  <tr>
+    <td style="text-align: center;">1</td>
+    <td>Viết chi tiết nội dung báo cáo Chương 2 và Chương 3 (Thiết kế hệ thống, phân tích chức năng)</td>
+    <td>Lương Vũ Xuân Đạt</td>
+    <td>02/07</td>
+    <td>Cao</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;">2</td>
+    <td>Chỉnh sửa giao diện (CSS) để web hiển thị tốt hơn trên thiết bị di động (Responsive). Hỗ trợ tìm kiếm tài liệu bổ sung cho báo cáo.</td>
+    <td>Trương Anh Khoa</td>
+    <td>02/07</td>
+    <td>Trung bình</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;">3</td>
+    <td>Kiểm thử (Test) toàn bộ hệ thống, quay video demo dự án và tổng hợp hoàn thiện nội dung Slide thuyết trình.</td>
+    <td>Nguyễn Tiến Minh</td>
+    <td>03/07</td>
+    <td>Cao</td>
+  </tr>
+</table>
+
+<h2>V. Khó khăn và Đề xuất (Nếu có)</h2>
+<p><i>Nêu rõ các rào cản để cả nhóm (hoặc giảng viên) cùng tìm cách giải quyết.</i></p>
+<ul>
+  <li><b>Khó khăn gặp phải:</b> Việc tích hợp cổng thanh toán VNPAY thực tế đòi hỏi phải có tư cách pháp nhân (doanh nghiệp). Ngoài ra, khi gửi email xác nhận hóa đơn tự động, một số thư bị đẩy vào mục Thư rác (Spam) của hệ thống Gmail khiến khách hàng khó nhận thấy.</li>
+  <li><b>Hướng giải quyết / Đề xuất:</b> Nhóm đã linh hoạt chuyển sang sử dụng API của VietQR để khởi tạo mã QR thanh toán ngân hàng tự động (gắn liền với mã đơn hàng và số tiền thực tế). Điều này giúp việc demo thanh toán trực tuyến vừa dễ dàng, vừa chuyên nghiệp. Về phía email, nhóm đã bổ sung thông báo trên giao diện web nhắc nhở người dùng kiểm tra hộp thư rác.</li>
+</ul>
+
+<h2>VI. Đánh giá mức độ đóng góp (Tùy chọn)</h2>
+<p><i>Phần này rất hữu ích cho nhóm trưởng để tổng hợp điểm đánh giá cá nhân vào cuối kỳ.</i></p>
+<table>
+  <tr>
+    <th style="width: 5%;">STT</th>
+    <th style="width: 25%;">Họ và tên</th>
+    <th style="width: 30%;">Mức độ hoàn thành Deadline</th>
+    <th style="width: 20%;">Thái độ & Hợp tác</th>
+    <th style="width: 20%;">Đánh giá tuần (A/B/C)</th>
+  </tr>
+  <tr>
+    <td style="text-align: center;">1</td>
+    <td>Nguyễn Tiến Minh</td>
+    <td>Tốt</td>
+    <td>Rất tốt</td>
+    <td style="text-align: center;">A</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;">2</td>
+    <td>Lương Vũ Xuân Đạt</td>
+    <td>Tốt</td>
+    <td>Tốt</td>
+    <td style="text-align: center;">A</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;">3</td>
+    <td>Trương Anh Khoa</td>
+    <td>Tốt</td>
+    <td>Tốt</td>
+    <td style="text-align: center;">A</td>
+  </tr>
+</table>
+
+</body>
+</html>

@@ -36,7 +36,14 @@ export async function GET(req) {
       orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json(orders);
+    const userReviews = await prisma.review.findMany({
+      where: { userId: session.user.id },
+      select: { productId: true }
+    });
+    
+    const reviewedProductIds = userReviews.map(r => r.productId);
+
+    return NextResponse.json({ orders, reviewedProductIds });
   } catch (error) {
     console.error('Orders fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

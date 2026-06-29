@@ -77,23 +77,76 @@ export async function POST(req) {
         }
       }
 
+      // Tìm kiếm ngân sách (Budget) trong tin nhắn
+      let budget = null;
+      // RegExp tìm các dạng: 1tr, 1.5 triệu, 2 củ, 500k, 1000000 đ
+      const priceMatch = normalizedMsg.match(/(\d+(?:\.\d+)?)\s*(tr|trieu|cu|k|ngan|nghin|vnd|d)\b/i);
+      if (priceMatch) {
+        const num = parseFloat(priceMatch[1]);
+        const unit = priceMatch[2];
+        if (unit === 'tr' || unit === 'trieu' || unit === 'cu') {
+          budget = num * 1000000;
+        } else if (unit === 'k' || unit === 'nghin' || unit === 'ngan') {
+          budget = num * 1000;
+        } else if (unit === 'vnd' || unit === 'd') {
+          budget = num;
+        }
+      } else {
+        const rawNumMatch = normalizedMsg.match(/(\d{5,})/); // ví dụ: 500000
+        if (rawNumMatch) {
+          budget = parseInt(rawNumMatch[1], 10);
+        }
+      }
+
       // Smart database query matches
-      if (matchedCategory) {
-        const products = await prisma.product.findMany({
-          where: {
-            categoryId: matchedCategory.id,
-            isActive: true
-          },
-          take: 4,
+      if (matchedCategory || budget) {
+        const whereClause = { isActive: true };
+        if (matchedCategory) {
+          whereClause.categoryId = matchedCategory.id;
+        }
+        
+        let products = await prisma.product.findMany({
+          where: whereClause,
           orderBy: { createdAt: 'desc' }
         });
 
+        if (budget) {
+          // Lọc sản phẩm <= ngân sách (cộng thêm 10% du di)
+          products = products.filter(p => {
+             const activePrice = p.salePrice || p.price;
+             return activePrice <= budget * 1.1; 
+          });
+          // Sắp xếp ưu tiên mức giá gần với budget nhất (từ cao xuống thấp)
+          products.sort((a, b) => {
+             const pa = a.salePrice || a.price;
+             const pb = b.salePrice || b.price;
+             return pb - pa;
+          });
+        }
+
+        products = products.slice(0, 4); // Lấy top 4 sản phẩm
+
         if (products.length > 0) {
-          reply = `✨ VORTEX đang có các sản phẩm thuộc danh mục **${matchedCategory.name}** nổi bật sau:\n\n` + 
+          let intro = "";
+          if (matchedCategory && budget) {
+             intro = `✨ Với ngân sách khoảng **${formatPrice(budget)}**, VORTEX xin gợi ý các mẫu **${matchedCategory.name}** ngon nhất trong tầm giá:\n\n`;
+          } else if (budget) {
+             intro = `✨ Với tài chính tầm **${formatPrice(budget)}**, đây là những thiết bị xịn xò nhất bạn có thể sở hữu tại VORTEX:\n\n`;
+          } else {
+             intro = `✨ VORTEX đang có các sản phẩm thuộc danh mục **${matchedCategory.name}** nổi bật sau:\n\n`;
+          }
+
+          reply = intro + 
             products.map(p => `• **[${p.name}](/products/${p.slug})** - Giá: ${formatPrice(p.salePrice || p.price)} ${p.stock === 0 ? '*(Tạm hết hàng)*' : ''}`).join('\n') + 
-            `\n\nBạn có thể nhấn vào tên sản phẩm để xem chi tiết cấu hình và đặt hàng nhé!`;
+            `\n\nBạn có thể nhấn vào tên sản phẩm để xem chi tiết và đặt hàng nhé!`;
         } else {
-          reply = `😅 Hiện tại danh mục **${matchedCategory.name}** đang tạm hết sản phẩm hoặc chưa được cập nhật. Bạn tham khảo các danh mục khác giúp mình nhé!`;
+          if (budget && matchedCategory) {
+            reply = `😅 Hiện tại các mẫu **${matchedCategory.name}** trong tầm giá **${formatPrice(budget)}** đang tạm hết. Bạn thử tăng thêm ngân sách một chút hoặc xem các danh mục khác nhé!`;
+          } else if (budget) {
+            reply = `😅 Hiện tại VORTEX chưa có sản phẩm nào trong tầm giá **${formatPrice(budget)}**. Bạn thử tham khảo các phân khúc cao hơn xem sao nhé!`;
+          } else {
+            reply = `😅 Hiện tại danh mục **${matchedCategory.name}** đang tạm hết sản phẩm hoặc chưa được cập nhật. Bạn tham khảo các danh mục khác giúp mình nhé!`;
+          }
         }
       }
       // Policies & General matches

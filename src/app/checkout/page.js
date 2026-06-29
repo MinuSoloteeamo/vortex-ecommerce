@@ -41,6 +41,18 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState('');
   const [isCouponLoading, setIsCouponLoading] = useState(false);
   const [mockVnpay, setMockVnpay] = useState({ show: false, orderId: null, amount: 0, orderNumber: '' });
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [customReason, setCustomReason] = useState('');
+
+  const CANCEL_REASONS = [
+    'Muốn thay đổi địa chỉ giao hàng',
+    'Muốn thay đổi sản phẩm/màu sắc',
+    'Tìm thấy giá rẻ hơn ở nơi khác',
+    'Đổi ý, không muốn mua nữa',
+    'Thay đổi phương thức thanh toán',
+    'Khác'
+  ];
 
   // Location API State
   const [locationData, setLocationData] = useState([]);
@@ -674,16 +686,109 @@ export default function CheckoutPage() {
                 className="btn btn-secondary"
                 disabled={isLoading}
                 onClick={() => {
-                  setMockVnpay({ show: false, orderId: null, amount: 0, orderNumber: '' });
-                  setIsLoading(false);
-                  alert('Đơn hàng đã được tạo nhưng chưa thanh toán. Bạn có thể thanh toán sau trong trang Quản lý đơn hàng.');
-                  clearCart();
-                  router.push('/profile?tab=orders');
+                  setShowCancelModal(true);
+                  setCancelReason('');
+                  setCustomReason('');
                 }}
               >
                 Hủy thanh toán
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Modal Cute */}
+      {showCancelModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }}>
+          <div style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: 'var(--radius-xl)', width: '90%', maxWidth: '400px', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ fontSize: '4rem', marginBottom: '0.5rem', lineHeight: '1' }}>🥺</div>
+            <h2 style={{ marginBottom: '0.5rem', fontSize: '1.25rem' }}>Tại sao bạn lại hủy đơn?</h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Vortex sẽ rất buồn nếu bạn rời đi...</p>
+            
+            <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              {CANCEL_REASONS.map(reason => (
+                <label key={reason} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', padding: '0.75rem', border: '1px solid', borderColor: cancelReason === reason ? 'var(--color-primary)' : 'var(--border-subtle)', borderRadius: 'var(--radius-md)', background: cancelReason === reason ? 'var(--bg-card-hover)' : 'transparent', transition: 'all 0.2s ease' }}>
+                  <input 
+                    type="radio" 
+                    name="cancelReason" 
+                    value={reason}
+                    checked={cancelReason === reason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    style={{ accentColor: 'var(--color-primary)', width: '18px', height: '18px' }}
+                  />
+                  <span style={{ fontSize: '0.9rem' }}>{reason}</span>
+                </label>
+              ))}
+              
+              {cancelReason === 'Khác' && (
+                <textarea 
+                  className="input"
+                  placeholder="Nhập lý do của bạn để chúng mình cải thiện nhé..."
+                  rows="3"
+                  value={customReason}
+                  onChange={(e) => setCustomReason(e.target.value)}
+                  style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}
+                />
+              )}
+            </div>
+            
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button 
+                className="btn btn-outline" 
+                style={{ flex: 1, padding: '0.75rem' }}
+                onClick={() => setShowCancelModal(false)}
+              >
+                Không hủy nữa
+              </button>
+              <button 
+                className="btn btn-primary" 
+                style={{ flex: 1, padding: '0.75rem', background: 'var(--color-danger)', borderColor: 'var(--color-danger)', color: '#fff' }}
+                onClick={async () => {
+                  const finalReason = cancelReason === 'Khác' ? customReason : cancelReason;
+                  if (!finalReason) {
+                    alert('Vui lòng chọn lý do hủy');
+                    return;
+                  }
+                  
+                  setIsLoading(true);
+                  try {
+                    await fetch('/api/user/orders/cancel', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ orderId: mockVnpay.orderId, reason: finalReason })
+                    });
+                  } catch (e) {
+                    console.error('Cancel order error:', e);
+                  }
+                  
+                  setShowCancelModal(false);
+                  setMockVnpay({ show: false, orderId: null, amount: 0, orderNumber: '' });
+                  clearCart();
+                  setIsLoading(false);
+                  router.push('/account/orders');
+                }}
+              >
+                Xác nhận hủy
+              </button>
+            </div>
+            
+            <div style={{ marginTop: '1rem' }}>
+              <button 
+                className="btn btn-ghost"
+                style={{ fontSize: '0.85rem', color: 'var(--text-muted)', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setMockVnpay({ show: false, orderId: null, amount: 0, orderNumber: '' });
+                  clearCart();
+                  setIsLoading(false);
+                  router.push('/account/orders');
+                }}
+              >
+                Chỉ đóng (Thanh toán sau)
+              </button>
+            </div>
+
           </div>
         </div>
       )}
