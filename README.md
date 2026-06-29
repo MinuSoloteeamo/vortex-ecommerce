@@ -28,7 +28,7 @@ VORTEX là một nền tảng thương mại điện tử hiện đại, chuyên
   * Thuật toán **Apriori / FP-Growth**: Gợi ý các "Sản phẩm thường được mua cùng" dựa trên lịch sử hóa đơn thực tế (Frequent Itemsets).
   * Thuật toán **Wilson Score Interval**: Xếp hạng độ uy tín của đánh giá (Review), hiển thị "Sản phẩm đánh giá tốt nhất" một cách công bằng theo toán học thống kê thay vì chỉ dựa vào trung bình cộng.
   * Thuật toán **Sentiment Analysis (NLP)**: Dùng AI mini (Dictionary-based) tự động phân tích sắc thái bình luận (Tích cực/Tiêu cực/Trung lập) và hiển thị trực quan trong màn hình Quản lý Đánh giá Admin.
-  * **Hệ thống Thông báo (Notification Bell):** Chuông thông báo realtime thông minh, tự động gửi "Welcome Back" khi đăng nhập hoặc thông báo ngay khi khách hàng đủ điểm Thăng Hạng VIP.
+  * **Hệ thống Thông báo (Notification Bell) & UI Tiện lợi:** Chuông thông báo realtime thông minh, tự động gửi "Welcome Back" khi đăng nhập, thông báo lên cấp VIP, hoặc nhắc nhở Đánh giá khi đơn hàng hoàn thành. Tích hợp UI **"Bong bóng chat gợi ý"** (Quick Suggestion Chips) giúp khách hàng đánh giá nhanh bằng một click.
 * **Quản trị (Admin Dashboard):**
   * Giao diện Admin quản lý Sản phẩm, Tin tức, Đơn hàng độc lập.
   * Cột điều hướng Sidebar dạng Hover thông minh giúp tối ưu không gian làm việc.

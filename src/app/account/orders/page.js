@@ -45,6 +45,14 @@ export default function OrdersPage() {
     'Khác'
   ];
 
+  const QUICK_REVIEWS = [
+    'Sản phẩm rất tốt 👍',
+    'Giao hàng nhanh đúng hạn 🚀',
+    'Đóng gói cẩn thận 📦',
+    'Chất lượng tuyệt vời ⭐',
+    'Sẽ ủng hộ shop tiếp ❤️'
+  ];
+
   const tabs = [
     { id: 'ALL', label: 'Tất cả' },
     { id: 'PENDING', label: 'Mới' },
@@ -282,6 +290,33 @@ export default function OrdersPage() {
                   onChange={e => setReviewForm({...reviewForm, comment: e.target.value})}
                   required
                 ></textarea>
+                
+                {/* Gợi ý đánh giá nhanh */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+                  {QUICK_REVIEWS.map((text, idx) => (
+                    <span 
+                      key={idx}
+                      onClick={() => {
+                        const currentComment = reviewForm.comment ? reviewForm.comment.trim() + ' ' : '';
+                        setReviewForm({...reviewForm, comment: currentComment + text});
+                      }}
+                      style={{
+                        padding: '4px 10px',
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: '99px',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer',
+                        color: 'var(--text-secondary)',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-blue)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                    >
+                      {text}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>

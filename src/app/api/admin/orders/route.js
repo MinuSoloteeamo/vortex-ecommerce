@@ -39,8 +39,8 @@ export async function PUT(req) {
       title = '🚚 Đơn hàng đang được giao';
       message = `Đơn hàng ${updatedOrder.orderNumber} đã được bàn giao cho đơn vị vận chuyển.`;
     } else if (status === 'DELIVERED') {
-      title = '🎉 Giao hàng thành công';
-      message = `Đơn hàng ${updatedOrder.orderNumber} đã được giao đến bạn. Cảm ơn bạn đã mua sắm tại VORTEX!`;
+      title = '🎉 Giao hàng thành công - Chờ đánh giá';
+      message = `Đơn hàng ${updatedOrder.orderNumber} đã được giao. Hãy chia sẻ cảm nhận và đánh giá sản phẩm ngay nhé!`;
     } else if (status === 'CANCELLED') {
       title = '❌ Đơn hàng đã bị hủy';
       message = `Đơn hàng ${updatedOrder.orderNumber} đã bị hủy. ${cancelReason ? 'Lý do: ' + cancelReason : ''}`;
