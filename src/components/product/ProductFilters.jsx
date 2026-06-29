@@ -157,7 +157,8 @@ export default function ProductFilters({ categories, brands, dynamicSpecs = {}, 
   const sortOptions = [
     { value: '', label: 'Mới nhất' },
     { value: 'price_asc', label: 'Giá thấp đến cao' },
-    { value: 'price_desc', label: 'Giá cao đến thấp' }
+    { value: 'price_desc', label: 'Giá cao đến thấp' },
+    { value: 'best_rated', label: 'Đánh giá tốt nhất' }
   ];
   const activeSortLabel = sortOptions.find(o => o.value === (currentSort || ''))?.label;
 

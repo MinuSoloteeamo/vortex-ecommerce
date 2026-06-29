@@ -14,13 +14,53 @@ export class ReviewService {
       throw new Error('Bạn đã đánh giá sản phẩm này rồi');
     }
 
-    return prisma.review.create({
+    const newReview = await prisma.review.create({
       data: {
         userId,
         productId,
         rating,
         comment
       }
+    });
+
+    // Cập nhật Wilson Score
+    await ReviewService.updateWilsonScore(productId);
+
+    return newReview;
+  }
+
+  /**
+   * Tính toán và cập nhật Wilson Score Interval cho sản phẩm
+   */
+  static async updateWilsonScore(productId) {
+    const aggregations = await prisma.review.groupBy({
+      by: ['productId'],
+      where: { productId },
+      _count: { rating: true },
+    });
+
+    const totalReviews = aggregations.length > 0 ? aggregations[0]._count.rating : 0;
+    if (totalReviews === 0) return;
+
+    const positiveReviewsAgg = await prisma.review.aggregate({
+      where: { productId, rating: { gte: 4 } },
+      _count: { rating: true }
+    });
+    
+    const positiveReviews = positiveReviewsAgg._count.rating;
+    
+    // Công thức Wilson Score Interval (95% confidence)
+    const z = 1.95996; 
+    const p = positiveReviews / totalReviews;
+    const denominator = 1 + z * z / totalReviews;
+    const centreAdjustedProbability = p + z * z / (2 * totalReviews);
+    const adjustedStandardDeviation = Math.sqrt((p * (1 - p) + z * z / (4 * totalReviews)) / totalReviews);
+    
+    const wilsonScore = (centreAdjustedProbability - z * adjustedStandardDeviation) / denominator;
+
+    await prisma.product.update({
+      where: { id: productId },
+      data: { wilsonScore }
     });
   }
 

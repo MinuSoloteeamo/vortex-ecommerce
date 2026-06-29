@@ -46,6 +46,8 @@ export class ProductService {
       orderBy = { price: 'asc' };
     } else if (sortBy === 'price_desc') {
       orderBy = { price: 'desc' };
+    } else if (sortBy === 'best_rated') {
+      orderBy = { wilsonScore: 'desc' };
     }
 
     const products = await prisma.product.findMany({

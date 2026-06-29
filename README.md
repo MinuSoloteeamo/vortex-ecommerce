@@ -23,8 +23,11 @@ VORTEX là một nền tảng thương mại điện tử hiện đại, chuyên
   * Tích hợp NextAuth hoàn chỉnh, hỗ trợ **Đăng nhập/Đăng ký một chạm qua Google** tiện lợi. Đăng nhập truyền thống an toàn với mật khẩu băm.
   * **Ràng buộc đăng nhập:** Bắt buộc người dùng đăng nhập mới có thể tiến hành thanh toán, chuyển hướng cực thông minh với cơ chế `callbackUrl`.
   * Hỗ trợ tính năng mã giảm giá, tính phí vận chuyển theo cấp bậc hạng VIP.
-* **AI & Thông minh & Hệ thống:**
-  * Tích hợp **AI Chatbox** thông minh: tự động phân tích ngữ cảnh, có khả năng đoán ý định khách hàng dù gõ tắt hay sai chính tả, giới thiệu các sản phẩm hot.
+* **AI & Thuật toán Nâng cao (Algorithms):**
+  * Tích hợp **AI Chatbox** thông minh: tự động phân tích ngữ cảnh, có khả năng đoán ý định khách hàng dù gõ tắt hay sai chính tả, giới thiệu các sản phẩm hot, bắt ngân sách (budget filter).
+  * Thuật toán **Apriori / FP-Growth**: Gợi ý các "Sản phẩm thường được mua cùng" dựa trên lịch sử hóa đơn thực tế (Frequent Itemsets).
+  * Thuật toán **Wilson Score Interval**: Xếp hạng độ uy tín của đánh giá (Review), hiển thị "Sản phẩm đánh giá tốt nhất" một cách công bằng theo toán học thống kê thay vì chỉ dựa vào trung bình cộng.
+  * Thuật toán **Sentiment Analysis (NLP)**: Dùng AI mini (Dictionary-based) tự động phân tích sắc thái bình luận (Tích cực/Tiêu cực/Trung lập) và hiển thị trực quan trong màn hình Quản lý Đánh giá Admin.
   * **Hệ thống Thông báo (Notification Bell):** Chuông thông báo realtime thông minh, tự động gửi "Welcome Back" khi đăng nhập hoặc thông báo ngay khi khách hàng đủ điểm Thăng Hạng VIP.
 * **Quản trị (Admin Dashboard):**
   * Giao diện Admin quản lý Sản phẩm, Tin tức, Đơn hàng độc lập.

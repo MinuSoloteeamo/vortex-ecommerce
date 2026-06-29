@@ -17,6 +17,7 @@ export default function AdminLayout({ children }) {
     { href: '/admin/support', label: 'Hỗ trợ Trực tuyến', icon: '💬' },
     { href: '/admin/users', label: 'Quản lý Người dùng', icon: '👥' },
     { href: '/admin/news', label: 'Quản lý Tin tức', icon: '📰' },
+    { href: '/admin/reviews', label: 'Quản lý Đánh giá', icon: '⭐' },
     { href: '/', label: 'Về trang Khách hàng', icon: '⬅️' },
   ];
 

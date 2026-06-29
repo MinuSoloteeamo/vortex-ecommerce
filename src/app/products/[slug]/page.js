@@ -10,6 +10,7 @@ import { ReviewService } from '@/services/ReviewService';
 import ReviewSection from '@/components/product/ReviewSection';
 import ViewedProductTracker from '@/components/product/ViewedProductTracker';
 import ProductInteractive from '@/components/product/ProductInteractive';
+import FrequentlyBoughtTogether from '@/components/product/FrequentlyBoughtTogether';
 import { auth } from '@/auth';
 import { ProductService } from '@/services/ProductService';
 
@@ -114,6 +115,7 @@ export default async function ProductDetailPage({ params }) {
           isWishlisted={isWishlisted} 
           cartProduct={cartProduct} 
         />
+        <FrequentlyBoughtTogether productSlug={product.slug} />
       </div>
       
       {/* RELATED PRODUCTS */}
