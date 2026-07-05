@@ -12,6 +12,11 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
 
+    console.log('--- API /api/user/orders ---');
+    console.log('Session User ID:', session.user.id);
+    console.log('Session User Email:', session.user.email);
+    console.log('Status param:', status);
+
     const whereClause = { userId: session.user.id };
     if (status && status !== 'ALL') {
       whereClause.status = status;
@@ -38,12 +43,13 @@ export async function GET(req) {
 
     const userReviews = await prisma.review.findMany({
       where: { userId: session.user.id },
-      select: { productId: true }
+      select: { orderId: true, productId: true }
     });
     
-    const reviewedProductIds = userReviews.map(r => r.productId);
+    // Tạo mảng string "orderId_productId" để dễ check ở FE
+    const reviewedItems = userReviews.map(r => `${r.orderId}_${r.productId}`);
 
-    return NextResponse.json({ orders, reviewedProductIds });
+    return NextResponse.json({ orders, reviewedItems });
   } catch (error) {
     console.error('Orders fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -51,7 +51,14 @@ export default async function ProductsPage({ searchParams }) {
     auth()
   ]);
 
-  const brands = brandsResult.map(b => b.brand);
+  const brandMap = new Map();
+  brandsResult.forEach(b => {
+    if (b.brand) {
+      const lower = b.brand.trim().toLowerCase();
+      if (!brandMap.has(lower)) brandMap.set(lower, b.brand.trim());
+    }
+  });
+  const brands = Array.from(brandMap.values()).sort();
 
   // Parse color filter from searchParams
   const colorFilter = resolvedSearchParams.color 
@@ -59,26 +66,37 @@ export default async function ProductsPage({ searchParams }) {
     : [];
 
   // Extract available dynamic specs from allBaseProducts (exclude color-related specs)
-  const availableSpecs = {};
+  const specsMap = new Map(); // lowercaseKey -> { originalKey, valuesMap: lowercaseValue -> originalValue }
+  
   allBaseProducts.forEach(p => {
     if (p.specs) {
       try {
         const parsed = JSON.parse(p.specs);
+        
+        const processSpec = (rawKey, rawValue) => {
+          if (!rawKey || !rawValue) return;
+          const keyStr = String(rawKey).trim();
+          const valStr = String(rawValue).trim();
+          if (!keyStr || !valStr) return;
+
+          const keyLower = keyStr.toLowerCase();
+          if (keyLower.includes('màu') || keyLower.includes('color')) return;
+
+          if (!specsMap.has(keyLower)) {
+            specsMap.set(keyLower, { originalKey: keyStr, valuesMap: new Map() });
+          }
+          
+          const valLower = valStr.toLowerCase();
+          if (!specsMap.get(keyLower).valuesMap.has(valLower)) {
+            specsMap.get(keyLower).valuesMap.set(valLower, valStr);
+          }
+        };
+
         if (Array.isArray(parsed)) {
-          parsed.forEach(spec => {
-            if (spec.key && spec.value) {
-              const keyLower = spec.key.toLowerCase();
-              if (keyLower.includes('màu') || keyLower.includes('color')) return; // skip color specs
-              if (!availableSpecs[spec.key]) availableSpecs[spec.key] = new Set();
-              availableSpecs[spec.key].add(spec.value);
-            }
-          });
+          parsed.forEach(spec => processSpec(spec.key, spec.value));
         } else if (typeof parsed === 'object' && parsed !== null) {
           for (const [key, val] of Object.entries(parsed)) {
-            const keyLower = key.toLowerCase();
-            if (keyLower.includes('màu') || keyLower.includes('color')) continue; // skip color specs
-            if (!availableSpecs[key]) availableSpecs[key] = new Set();
-            availableSpecs[key].add(val);
+            processSpec(key, val);
           }
         }
       } catch (e) {}
@@ -104,8 +122,8 @@ export default async function ProductsPage({ searchParams }) {
 
   // Convert Sets to Arrays for passing to Client Component
   const dynamicSpecsOptions = {};
-  for (const key in availableSpecs) {
-    dynamicSpecsOptions[key] = Array.from(availableSpecs[key]).sort();
+  for (const [keyLower, data] of specsMap.entries()) {
+    dynamicSpecsOptions[data.originalKey] = Array.from(data.valuesMap.values()).sort();
   }
 
   const colorOptions = Array.from(colorMap.values()).sort();

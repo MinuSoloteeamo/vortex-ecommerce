@@ -97,6 +97,21 @@ export default function AdminSupportPage() {
       console.error(err);
     }
   };
+  const handleDeleteAll = async () => {
+    if (!confirm('🚨 NGUY HIỂM: Bạn có chắc chắn muốn XÓA TOÀN BỘ lịch sử chat của TẤT CẢ khách hàng không? Hành động này không thể hoàn tác!')) return;
+
+    try {
+      const res = await fetch(`/api/admin/chat?sessionId=ALL`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setSelectedSessionId(null);
+        setSessions([]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className={styles.adminPage}>
@@ -108,7 +123,19 @@ export default function AdminSupportPage() {
       <div className={styles.dashboardContainer}>
         {/* SESSIONS SIDEBAR */}
         <aside className={styles.sidebar}>
-          <h2 className={styles.sectionTitle}>💬 Khách Hàng Trực Tuyến</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 className={styles.sectionTitle}>💬 Khách Hàng Trực Tuyến</h2>
+            {sessions.length > 0 && (
+              <button 
+                onClick={handleDeleteAll}
+                className="btn btn-secondary"
+                style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', borderColor: 'var(--color-danger)', color: 'var(--color-danger)' }}
+                title="Xóa toàn bộ lịch sử chat"
+              >
+                🗑️ Xóa Tất Cả
+              </button>
+            )}
+          </div>
           {loading && sessions.length === 0 ? (
             <div className={styles.loading}>Đang nạp phiên chat...</div>
           ) : sessions.length === 0 ? (

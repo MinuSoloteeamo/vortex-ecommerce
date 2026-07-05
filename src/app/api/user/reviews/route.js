@@ -21,22 +21,24 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Invalid order for review' }, { status: 400 });
     }
 
-    // Check if user already reviewed this product
+    // Check if user already reviewed this product in THIS order
     const existing = await prisma.review.findFirst({
       where: {
         userId: session.user.id,
-        productId: productId
+        productId: productId,
+        orderId: orderId
       }
     });
 
     if (existing) {
-      return NextResponse.json({ error: 'Bạn đã đánh giá sản phẩm này rồi' }, { status: 400 });
+      return NextResponse.json({ error: 'Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi' }, { status: 400 });
     }
 
     const review = await prisma.review.create({
       data: {
         userId: session.user.id,
         productId,
+        orderId,
         rating: parseInt(rating),
         comment
       }

@@ -166,9 +166,13 @@ export async function DELETE(req) {
       return NextResponse.json({ message: 'Missing sessionId' }, { status: 400 });
     }
 
-    await prisma.chatSession.delete({
-      where: { id: sessionId }
-    });
+    if (sessionId === 'ALL') {
+      await prisma.chatSession.deleteMany({});
+    } else {
+      await prisma.chatSession.delete({
+        where: { id: sessionId }
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

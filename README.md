@@ -34,6 +34,12 @@ VORTEX là một nền tảng thương mại điện tử hiện đại, chuyên
   * Cột điều hướng Sidebar dạng Hover thông minh giúp tối ưu không gian làm việc.
   * **Dashboard Doanh thu Trực quan:** Tích hợp `chart.js` hiển thị biểu đồ cột (theo thời gian Năm/Quý/Tháng/Ngày) và biểu đồ tròn (theo danh mục, thương hiệu, thanh toán).
 
+## 🔄 Cập nhật gần đây (Changelog)
+* **Giao diện Đánh giá (Review UI):** Cân đối lại bố cục 2 nút "Trở lại" và "Gửi đánh giá" (cùng kích thước 50/50, chung hàng ngang). Chỉnh sửa nút "Đánh giá" bên ngoài danh sách đơn thành dạng `btn-primary` cực kỳ nổi bật để người dùng dễ nhìn thấy.
+* **Giao diện AI Chatbot:** Nâng cấp phong cách CSS Chat Bubble thành "Dark Premium" (hiệu ứng kính mờ glassmorphism, viền neon tím sang trọng) thay vì dải gradient cũ.
+* **Logic Đánh giá:** Hỗ trợ tính năng đánh giá chi lập lập trên *từng* sản phẩm trong *từng* đơn hàng khác nhau (tách bạch rõ ràng thông qua `orderId`). Đã dọn dẹp các dòng nhắc nhở đánh giá dư thừa trong trang chi tiết sản phẩm.
+* **Sửa lỗi (Bug fixes):** Xử lý dứt điểm lỗi crash API (lỗi 500) không lấy được danh sách đơn hàng sau khi cập nhật cơ sở dữ liệu mới (đã chạy lại Prisma DB Push & Prisma Generate).
+
 ## 🛠 Công nghệ sử dụng (Tech Stack)
 * **Khung ứng dụng (Framework):**   [Next.js](https://nextjs.org/) (App Router, Server Actions)
 *   [React](https://reactjs.org/)

@@ -72,20 +72,7 @@ export default function ReviewSection({ productId, initialReviews, totalCount, a
         </div>
       </div>
 
-      {session ? (
-        <div style={{ marginTop: 'var(--space-xl)', padding: 'var(--space-lg)', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-subtle)', textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Bạn có thể để lại đánh giá cho sản phẩm này sau khi mua và nhận hàng thành công tại mục <a href="/account/orders" style={{ color: 'var(--color-primary)', fontWeight: 'bold', textDecoration: 'underline' }}>Quản lý đơn hàng</a>.
-          </p>
-        </div>
-      ) : (
-        <div style={{ marginTop: 'var(--space-xl)', padding: 'var(--space-lg)', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-secondary)' }}>Vui lòng đăng nhập để xem chi tiết và đánh giá sản phẩm.</p>
-          <button className="btn btn-outline" style={{ marginTop: '1rem' }} onClick={() => useAuthModalStore.getState().open()}>
-            Đăng nhập ngay
-          </button>
-        </div>
-      )}
+
 
       <div className={styles.reviewList}>
         {reviews.length === 0 ? (

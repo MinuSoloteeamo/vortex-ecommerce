@@ -30,7 +30,7 @@ export default function OrdersPage() {
 
   const [reviewModal, setReviewModal] = useState({ isOpen: false, orderId: null, product: null });
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
-  const [reviewedProductIds, setReviewedProductIds] = useState([]);
+  const [reviewedItems, setReviewedItems] = useState([]);
 
   const [cancelModal, setCancelModal] = useState({ isOpen: false, orderId: null });
   const [cancelReason, setCancelReason] = useState('');
@@ -73,7 +73,7 @@ export default function OrdersPage() {
       if (res.ok) {
         const data = await res.json();
         setOrders(data.orders || []);
-        setReviewedProductIds(data.reviewedProductIds || []);
+        setReviewedItems(data.reviewedItems || []);
       }
     } catch (e) {
       console.error(e);
@@ -127,7 +127,7 @@ export default function OrdersPage() {
       });
       if (res.ok) {
         useToastStore.getState().success('Đánh giá thành công! Cảm ơn bạn. ❤️');
-        setReviewedProductIds([...reviewedProductIds, reviewModal.product.id]);
+        setReviewedItems([...reviewedItems, `${reviewModal.orderId}_${reviewModal.product.id}`]);
         setReviewModal({ isOpen: false, orderId: null, product: null });
         setReviewForm({ rating: 5, comment: '' });
       } else {
@@ -215,13 +215,13 @@ export default function OrdersPage() {
                       <div className={styles.itemPrice}>{formatPrice(item.price)}</div>
                       
                       {order.status === 'DELIVERED' && (
-                        reviewedProductIds.includes(item.product.id) ? (
+                        reviewedItems.includes(`${order.id}_${item.product.id}`) ? (
                           <div style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', marginTop: '0.5rem', color: 'var(--color-success)', border: '1px solid var(--color-success)', borderRadius: 'var(--radius-sm)', display: 'inline-block' }}>
                             Đã đánh giá ✓
                           </div>
                         ) : (
                           <button 
-                            className="btn btn-outline" 
+                            className="btn btn-primary" 
                             style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', marginTop: '0.5rem' }}
                             onClick={() => setReviewModal({ isOpen: true, orderId: order.id, product: item.product })}
                           >
@@ -319,10 +319,10 @@ export default function OrdersPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setReviewModal({ isOpen: false, orderId: null, product: null })}>Trở lại</button>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setReviewModal({ isOpen: false, orderId: null, product: null })}>Trở lại</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Gửi đánh giá</button>
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Gửi đánh giá</button>
             </form>
           </div>
         </div>

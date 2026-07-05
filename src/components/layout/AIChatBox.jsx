@@ -12,6 +12,7 @@ export default function AIChatBox() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [confirmClear, setConfirmClear] = useState(false);
   
   const { data: authSession } = useSession();
   const isAdmin = authSession?.user?.role === 'ADMIN';
@@ -206,6 +207,36 @@ export default function AIChatBox() {
     }
   };
 
+  const handleClearHistory = async () => {
+    if (!confirmClear) {
+      setConfirmClear(true);
+      setTimeout(() => setConfirmClear(false), 3000);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/chat/session/clear', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+      });
+
+      if (res.ok) {
+        setMessages([
+          {
+            id: 'welcome-new',
+            senderType: 'AI',
+            content: 'Lịch sử trò chuyện đã được xóa sạch! 🧹 Tôi sẵn sàng hỗ trợ bạn lại từ đầu. Hôm nay bạn cần tư vấn gì nào?'
+          }
+        ]);
+        setSessionStatus('AI');
+        setConfirmClear(false);
+      }
+    } catch (err) {
+      console.error('Error clearing chat:', err);
+    }
+  };
+
   const handleConnectHuman = async () => {
     if (!sessionId) return;
 
@@ -355,6 +386,13 @@ export default function AIChatBox() {
                   💬 Gặp người
                 </button>
               )}
+              <button 
+                className={`${styles.clearBtn} ${confirmClear ? styles.clearBtnConfirm : ''}`}
+                onClick={handleClearHistory}
+                title={confirmClear ? 'Nhấn lần nữa để xác nhận xóa' : 'Xóa lịch sử trò chuyện'}
+              >
+                {confirmClear ? '⚠️ Xác nhận?' : '🗑️'}
+              </button>
               <button className={styles.closeBtn} onClick={() => setIsOpen(false)} aria-label="Close Chat">
                 &times;
               </button>
