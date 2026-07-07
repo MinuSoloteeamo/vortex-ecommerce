@@ -37,9 +37,10 @@ export class ProductService {
       ];
     }
 
-    if (search) {
-      where.name = { contains: search };
-    }
+    // Remove standard DB search since we need to do in-memory Vietnamese unaccented search
+    // if (search) {
+    //   where.name = { contains: search };
+    // }
 
     let orderBy = { createdAt: 'desc' };
     if (sortBy === 'price_asc') {
@@ -50,7 +51,7 @@ export class ProductService {
       orderBy = { wilsonScore: 'desc' };
     }
 
-    const products = await prisma.product.findMany({
+    let products = await prisma.product.findMany({
       where,
       include: {
         category: true,
@@ -60,9 +61,25 @@ export class ProductService {
       orderBy
     });
 
+    // In-memory filter for search (Vietnamese without accents)
+    if (search) {
+      const normalizedKeyword = removeVietnameseDiacritics(search.trim());
+      products = products.filter(product => {
+        const fields = [
+          product.name,
+          product.brand,
+          product.category?.name,
+          product.description
+        ];
+        return fields.some(field =>
+          removeVietnameseDiacritics(field).includes(normalizedKeyword)
+        );
+      });
+    }
+
     // In-memory filter for specs (since SQLite JSON query is limited)
     if (specs && Object.keys(specs).length > 0) {
-      return products.filter(product => {
+      products = products.filter(product => {
         if (!product.specs) return false;
         try {
           const productSpecs = JSON.parse(product.specs);
