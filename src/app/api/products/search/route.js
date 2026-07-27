@@ -10,9 +10,10 @@ export async function GET(req) {
       return NextResponse.json({ categories: [], products: [] });
     }
 
-    const { categories, products } = await ProductService.getSearchSuggestions(q);
+    const { categories, products, isFallback } = await ProductService.getSearchSuggestions(q);
 
     return NextResponse.json({
+      isFallback: !!isFallback,
       categories: categories.map(cat => ({
         id: cat.id,
         name: cat.name,

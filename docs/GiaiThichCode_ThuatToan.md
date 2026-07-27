@@ -171,8 +171,32 @@ Khách hàng tên A đã Đăng nhập. Khách chọn mua chuột, thêm vào Gi
 
 ---
 
+## 7. Thuật Toán Tìm Kiếm Thông Minh: Tự Động Gợi Ý Sản Phẩm Phổ Biến Khi Tìm Trống (Search Fallback)
+### A. Vị trí Code (Nằm ở đâu?)
+- **Đường dẫn File (Giao diện):** `src/components/layout/SearchBar.jsx` & `src/app/products/page.js`
+- **Đường dẫn File (Backend Service):** `src/services/ProductService.js` (Hàm `getAllProducts`, `searchProducts`, `getPopularProducts`)
+- **Đường dẫn File (API Route):** `src/app/api/products/search/route.js`
+
+### B. Kịch bản Người dùng (User Flow)
+Khách hàng gõ một từ khóa tìm kiếm mà trong cửa hàng hiện không có sản phẩm nào khớp (VD: Gõ "iPhone 16", "Laptop Dell" hoặc nhập sai chính tả).
+Thay vì hiển thị trang trắng trơn thất vọng làm khách thoát web, hệ thống ngay lập tức giữ chân khách bằng cách thông báo lịch sự: *"Không tìm thấy sản phẩm phù hợp. Dưới đây là những sản phẩm phổ biến được các khách hàng khác chọn mua nhiều nhất tại VORTEX"*. Các sản phẩm hot nhất thị trường lập tức xuất hiện để gợi ý mua sắm cho khách hàng.
+
+### C. Phân tích Luồng Code Chi Tiết
+1. Khi khách nhập từ khóa `search`, Backend tiến hành lọc Tiếng Việt không dấu NFD qua danh sách sản phẩm.
+2. Nếu mảng `matchedProducts.length === 0` (không có kết quả):
+   - Kích hoạt hàm `ProductService.getPopularProducts(limit)` truy vấn các sản phẩm có `isActive: true`.
+   - Sắp xếp ưu tiên theo `soldCount: 'desc'` (số lượt đã bán nhiều nhất) và `wilsonScore: 'desc'` (điểm đánh giá cao nhất).
+   - Gắn cờ `products.isFallback = true` vào mảng kết quả trả về.
+3. Khi Frontend (`products/page.js` hoặc `SearchBar.jsx`) nhận được dữ liệu có `isFallback === true`:
+   - Hiển thị banner nổi bật thông báo màu cam ấm áp giải thích cho khách hàng.
+   - Render danh sách các sản phẩm bán chạy nhất giúp kích thích nhu cầu mua sắm thay vì rời đi.
+
+---
+
 ## LỜI KHUYÊN KHI TRẢ LỜI PHẢN BIỆN
 * **Nếu GV hỏi: "Code bằng Next.js thì kết nối Database kiểu gì?"**
   => Trả lời: Em dùng Prisma ORM. Khác với SQL truyền thống dễ bị lỗi SQL Injection, Prisma tự động map các Table thành các Object trong Javascript, giúp Code bảo mật tuyệt đối và quản lý quan hệ dữ liệu tự động.
 * **Nếu GV hỏi: "Thuật toán lọc In-memory có làm chậm server nếu web có 1 triệu sản phẩm không?"**
   => Trả lời: Có ạ. Với quy mô đồ án môn học, em áp dụng In-memory vì SQLite không hỗ trợ Full-text search Tiếng Việt tốt. Tuy nhiên trong đồ án em đã thiết kế chuẩn kiến trúc tách lớp (Service Layer). Trong thực tế, chỉ cần nhổ SQLite ra thay bằng PostgreSQL (có tích hợp pg_trgm extension) hoặc ElasticSearch là hệ thống chịu tải được triệu sản phẩm mà không phải sửa logic API. Kiến trúc linh hoạt mới là cái cốt lõi em hướng đến.
+* **Nếu GV hỏi: "Chức năng tìm kiếm xử lý thế nào khi không tìm thấy sản phẩm?"**
+  => Trả lời: Hệ thống áp dụng cơ chế Fallback thông minh. Khi từ khóa không khớp bất kỳ sản phẩm nào, hệ thống không để trang trống mà tự động lấy các sản phẩm phổ biến nhất (dựa trên số lượt đã bán soldCount và điểm Wilson Score) để đề xuất cho người dùng, giúp tối ưu tỷ lệ chuyển đổi mua hàng (Conversion Rate).

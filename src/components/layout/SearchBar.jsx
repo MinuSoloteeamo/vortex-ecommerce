@@ -9,6 +9,7 @@ export default function SearchBar() {
   const [query, setQuery] = useState('');
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [isFallback, setIsFallback] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const wrapperRef = useRef(null);
@@ -19,6 +20,7 @@ export default function SearchBar() {
     if (!query.trim()) {
       setCategories([]);
       setProducts([]);
+      setIsFallback(false);
       setIsOpen(false);
       return;
     }
@@ -31,6 +33,7 @@ export default function SearchBar() {
           const data = await res.json();
           setCategories(data.categories || []);
           setProducts(data.products || []);
+          setIsFallback(data.isFallback || false);
           setIsOpen(true);
         }
       } catch (error) {
@@ -114,7 +117,9 @@ export default function SearchBar() {
 
               {products.length > 0 && (
                 <>
-                  <li className={styles.sectionTitle}>📦 Sản phẩm</li>
+                  <li className={styles.sectionTitle}>
+                    {isFallback ? '🔥 Sản phẩm phổ biến được mua nhiều nhất' : '📦 Sản phẩm'}
+                  </li>
                   {products.map(product => (
                     <li key={`prod-${product.id}`}>
                       <Link href={`/products/${product.slug}`} className={styles.resultItem} onClick={() => setIsOpen(false)}>

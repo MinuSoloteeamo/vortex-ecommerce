@@ -179,10 +179,28 @@ export default async function ProductsPage({ searchParams }) {
           {/* MAIN CONTENT */}
           <main className={styles.main}>
             {filters.search && (
-              <div style={{ marginBottom: '1rem' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
                 <Link href="/products" className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', display: 'inline-block' }}>
-                  Xóa tìm kiếm: "{filters.search}"
+                  Xóa tìm kiếm: &quot;{filters.search}&quot;
                 </Link>
+
+                {products.isFallback && (
+                  <div style={{
+                    marginTop: '1rem',
+                    padding: '1.25rem',
+                    borderRadius: '12px',
+                    background: 'rgba(245, 158, 11, 0.1)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    color: 'var(--text-primary)'
+                  }}>
+                    <div style={{ fontWeight: '600', fontSize: '1rem', color: '#f59e0b', marginBottom: '0.25rem' }}>
+                      🔍 Không tìm thấy sản phẩm nào phù hợp với từ khóa &quot;{filters.search}&quot;
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                      Dưới đây là những <strong>sản phẩm phổ biến được các khách hàng khác chọn mua nhiều nhất</strong> tại VORTEX:
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             

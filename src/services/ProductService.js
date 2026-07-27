@@ -62,9 +62,10 @@ export class ProductService {
     });
 
     // 5. Lọc trong bộ nhớ RAM cho từ khóa tìm kiếm (Tiếng Việt không dấu NFD)
+    let isFallback = false;
     if (search) {
       const normalizedKeyword = removeVietnameseDiacritics(search.trim());
-      products = products.filter(product => {
+      const matchedProducts = products.filter(product => {
         const fields = [
           product.name,
           product.brand,
@@ -75,10 +76,20 @@ export class ProductService {
           removeVietnameseDiacritics(field).includes(normalizedKeyword)
         );
       });
+
+      // ĐIỀU KIỆN MỚI: Nếu khách hàng tìm kiếm mà không có sản phẩm nào tồn tại
+      // -> Hệ thống sẽ tự động lấy danh sách các sản phẩm phổ biến (bán chạy nhất & đánh giá cao nhất)
+      if (matchedProducts.length === 0) {
+        const popularProducts = await ProductService.getPopularProducts(12);
+        products = popularProducts;
+        isFallback = true;
+      } else {
+        products = matchedProducts;
+      }
     }
 
     // 6. Lọc trong bộ nhớ RAM cho Thông số kỹ thuật động (Specs JSON)
-    if (specs && Object.keys(specs).length > 0) {
+    if (specs && Object.keys(specs).length > 0 && !isFallback) {
       products = products.filter(product => {
         if (!product.specs) return false;
         try {
@@ -97,11 +108,36 @@ export class ProductService {
       });
     }
 
+    // Đánh dấu thuộc tính isFallback trên mảng kết quả
+    products.isFallback = isFallback;
     return products;
   }
 
   /**
-   * Search products by keyword (Vietnamese diacritics-insensitive)
+   * Lấy danh sách sản phẩm phổ biến được các khách hàng khác mua nhiều nhất
+   * (Sắp xếp theo số lượt đã bán soldCount giảm dần và điểm Wilson Score giảm dần)
+   */
+  static async getPopularProducts(limit = 8) {
+    const popular = await prisma.product.findMany({
+      where: { isActive: true },
+      include: {
+        category: true,
+        images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+        variants: { include: { images: true } }
+      },
+      orderBy: [
+        { soldCount: 'desc' },
+        { wilsonScore: 'desc' }
+      ],
+      take: limit
+    });
+    popular.isFallback = true;
+    return popular;
+  }
+
+  /**
+   * Tìm kiếm sản phẩm theo từ khóa (không phân biệt dấu Tiếng Việt)
+   * Nếu không tìm thấy sản phẩm khớp -> Tự động trả về các sản phẩm phổ biến được mua nhiều nhất
    */
   static async searchProducts(keyword, limit = 8) {
     if (!keyword || keyword.trim() === '') return [];
@@ -117,39 +153,46 @@ export class ProductService {
       }
     });
 
-    return products
-      .filter(product => {
-        const fields = [
-          product.name,
-          product.brand,
-          product.category?.name,
-          product.description
-        ];
-        return fields.some(field =>
-          removeVietnameseDiacritics(field).includes(normalizedKeyword)
-        );
-      })
-      .slice(0, limit);
+    const matchedProducts = products.filter(product => {
+      const fields = [
+        product.name,
+        product.brand,
+        product.category?.name,
+        product.description
+      ];
+      return fields.some(field =>
+        removeVietnameseDiacritics(field).includes(normalizedKeyword)
+      );
+    });
+
+    if (matchedProducts.length > 0) {
+      return matchedProducts.slice(0, limit);
+    }
+
+    // Khi không tìm thấy sản phẩm khớp từ khóa -> Trả về danh sách sản phẩm phổ biến
+    return this.getPopularProducts(limit);
   }
 
   /**
-   * Get search suggestions: matching categories + products
+   * Lấy danh sách gợi ý tìm kiếm: Danh mục + Sản phẩm khớp từ khóa
+   * Nếu không có kết quả khớp -> Trả về sản phẩm phổ biến kèm cờ isFallback
    */
   static async getSearchSuggestions(keyword) {
-    if (!keyword || keyword.trim() === '') return { categories: [], products: [] };
+    if (!keyword || keyword.trim() === '') return { categories: [], products: [], isFallback: false };
 
     const normalizedKeyword = removeVietnameseDiacritics(keyword.trim());
 
-    // Fetch categories
-    const allCategories = await prisma.category.findMany();
+    // Tìm kiếm danh mục phù hợp
+    const allCategories = await prisma.category.findMany({ where: { isActive: true } });
     const categories = allCategories.filter(cat =>
       removeVietnameseDiacritics(cat.name).includes(normalizedKeyword)
     );
 
-    // Fetch products (reuse searchProducts)
+    // Tìm kiếm sản phẩm (hoặc lấy sản phẩm phổ biến nếu tìm kiếm trống)
     const products = await this.searchProducts(keyword, 5);
+    const isFallback = !!products.isFallback;
 
-    return { categories, products };
+    return { categories, products, isFallback };
   }
 
   /**
