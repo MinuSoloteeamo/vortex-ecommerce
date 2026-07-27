@@ -17,12 +17,12 @@ function getColorFromName(name) {
   if (n.includes('tím') || n.includes('purple')) return '#8E24AA';
   if (n.includes('xám') || n.includes('grey') || n.includes('gray')) return '#757575';
   if (n.includes('bạc') || n.includes('silver')) return '#BDBDBD';
-  // Attempt to parse rgb/hex or fallback
+  // Cố gắng phân tích mã màu rgb/hex hoặc trả về màu mặc định
   if (n.startsWith('#')) return n;
   return '#444444';
 }
 
-// Icons
+// Bộ icon SVG
 const FilterIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
 );
@@ -41,15 +41,15 @@ export default function ProductFilters({ categories, brands, dynamicSpecs = {}, 
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Layout states
+  // Quản lý trạng thái đóng/mở giao diện (Drawer & Sắp xếp)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   
-  // Accordion state
+  // Quản lý trạng thái gập/mở của từng mục accordion bộ lọc
   const [expanded, setExpanded] = useState({ price: false, category: false, brand: false, color: false });
   const toggleAccordion = (key) => setExpanded(prev => ({ ...prev, [key]: !prev[key] }));
 
-  // Filter states
+  // Quản lý các trạng thái lọc dữ liệu
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [minPrice, setMinPrice] = useState('');

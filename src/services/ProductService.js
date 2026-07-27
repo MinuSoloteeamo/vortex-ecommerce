@@ -3,22 +3,25 @@ import { removeVietnameseDiacritics } from '@/lib/utils';
 
 export class ProductService {
   /**
-   * Get all products with optional filtering
+   * Lấy danh sách tất cả sản phẩm kèm các bộ lọc tùy chọn
    */
   static async getAllProducts(filters = {}) {
     const { category, group, brand, minPrice, maxPrice, search, sortBy, specs } = filters;
     const where = { isActive: true };
 
+    // 1. Lọc theo Danh mục hoặc Nhóm danh mục
     if (category) {
       where.category = Array.isArray(category) ? { slug: { in: category } } : { slug: category };
     } else if (group) {
       where.category = Array.isArray(group) ? { parentGroup: { in: group } } : { parentGroup: group };
     }
 
+    // 2. Lọc theo Thương hiệu
     if (brand) {
       where.brand = Array.isArray(brand) ? { in: brand } : brand;
     }
 
+    // 3. Lọc theo Khoảng giá (Min / Max Price)
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.OR = [
         {
@@ -37,11 +40,7 @@ export class ProductService {
       ];
     }
 
-    // Remove standard DB search since we need to do in-memory Vietnamese unaccented search
-    // if (search) {
-    //   where.name = { contains: search };
-    // }
-
+    // 4. Xử lý Sắp xếp danh sách sản phẩm
     let orderBy = { createdAt: 'desc' };
     if (sortBy === 'price_asc') {
       orderBy = { price: 'asc' };
@@ -51,6 +50,7 @@ export class ProductService {
       orderBy = { wilsonScore: 'desc' };
     }
 
+    // Truy vấn cơ sở dữ liệu lấy sản phẩm khớp với các bộ lọc ở trên
     let products = await prisma.product.findMany({
       where,
       include: {
@@ -61,7 +61,7 @@ export class ProductService {
       orderBy
     });
 
-    // In-memory filter for search (Vietnamese without accents)
+    // 5. Lọc trong bộ nhớ RAM cho từ khóa tìm kiếm (Tiếng Việt không dấu NFD)
     if (search) {
       const normalizedKeyword = removeVietnameseDiacritics(search.trim());
       products = products.filter(product => {
@@ -77,18 +77,17 @@ export class ProductService {
       });
     }
 
-    // In-memory filter for specs (since SQLite JSON query is limited)
+    // 6. Lọc trong bộ nhớ RAM cho Thông số kỹ thuật động (Specs JSON)
     if (specs && Object.keys(specs).length > 0) {
       products = products.filter(product => {
         if (!product.specs) return false;
         try {
           const productSpecs = JSON.parse(product.specs);
-          // Check if product satisfies ALL requested spec filters
+          // Kiểm tra xem sản phẩm có thỏa mãn TẤT CẢ các bộ lọc thông số đã chọn không
           for (const [key, values] of Object.entries(specs)) {
-            // values could be an array if multiple are selected for the same key
             const requiredValues = Array.isArray(values) ? values : [values];
             if (!productSpecs[key]) return false;
-            // Product must match at least one of the selected values for this key
+            // Sản phẩm phải khớp ít nhất một trong các giá trị đã chọn cho khóa này
             if (!requiredValues.includes(productSpecs[key])) return false;
           }
           return true;

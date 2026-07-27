@@ -67,7 +67,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
         }
       } catch (err) {
-        console.error('Error creating welcome back notification:', err);
+        console.error('Lỗi khi tạo thông báo chào mừng quay lại:', err);
       }
     }
   }

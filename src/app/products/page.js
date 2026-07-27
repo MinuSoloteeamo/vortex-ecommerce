@@ -6,7 +6,7 @@ import styles from './page.module.css';
 import ProductCard from '@/components/product/ProductCard';
 import ProductFilters from '@/components/product/ProductFilters';
 
-// Format price utility
+// Hàm định dạng hiển thị giá tiền VND
 function formatPrice(price) {
   return new Intl.NumberFormat('vi-VN').format(price) + '₫';
 }
@@ -19,7 +19,7 @@ export const metadata = {
 export default async function ProductsPage({ searchParams }) {
   const resolvedSearchParams = await searchParams;
   
-  // Parse query params
+  // 1. Trích xuất các tham số lọc cơ bản từ URL (Query Params)
   const filters = {
     category: resolvedSearchParams.category ? (Array.isArray(resolvedSearchParams.category) ? resolvedSearchParams.category : [resolvedSearchParams.category]) : undefined,
     group: resolvedSearchParams.group,
@@ -30,7 +30,7 @@ export default async function ProductsPage({ searchParams }) {
     sortBy: resolvedSearchParams.sortBy,
   };
 
-  // Parse dynamic spec filters from searchParams (keys starting with spec_)
+  // 2. Trích xuất các bộ lọc thông số kỹ thuật động (bắt đầu bằng spec_)
   const specs = {};
   for (const [key, value] of Object.entries(resolvedSearchParams)) {
     if (key.startsWith('spec_')) {
@@ -40,12 +40,10 @@ export default async function ProductsPage({ searchParams }) {
   }
   filters.specs = specs;
 
-  // Fetch data & session
-  // To show all available specs for the current category/search, we should ideally fetch base products
-  // without spec filters. But for simplicity, we pass filters directly.
+  // 3. Truy vấn dữ liệu sản phẩm, danh mục, thương hiệu và phiên đăng nhập
   const [products, allBaseProducts, categories, brandsResult, session] = await Promise.all([
     ProductService.getAllProducts(filters),
-    ProductService.getAllProducts({ ...filters, specs: {} }), // fetch without specs to get all available options
+    ProductService.getAllProducts({ ...filters, specs: {} }), // Lấy sản phẩm chưa lọc specs để lấy tất cả tùy chọn có sẵn
     prisma.category.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
     prisma.product.findMany({ select: { brand: true }, distinct: ['brand'], where: { brand: { not: null } } }),
     auth()
@@ -60,12 +58,12 @@ export default async function ProductsPage({ searchParams }) {
   });
   const brands = Array.from(brandMap.values()).sort();
 
-  // Parse color filter from searchParams
+  // 4. Trích xuất bộ lọc màu sắc từ URL
   const colorFilter = resolvedSearchParams.color 
     ? (Array.isArray(resolvedSearchParams.color) ? resolvedSearchParams.color : [resolvedSearchParams.color]) 
     : [];
 
-  // Extract available dynamic specs from allBaseProducts (exclude color-related specs)
+  // 5. Tổng hợp danh sách các thông số kỹ thuật khả dụng từ các sản phẩm gốc (loại trừ màu sắc)
   const specsMap = new Map(); // lowercaseKey -> { originalKey, valuesMap: lowercaseValue -> originalValue }
   
   allBaseProducts.forEach(p => {
@@ -103,7 +101,7 @@ export default async function ProductsPage({ searchParams }) {
     }
   });
 
-  // Extract real colors from baseVariantName + variant names (normalize to merge duplicates)
+  // 6. Tổng hợp danh sách màu sắc khả dụng từ các biến thể sản phẩm
   const colorMap = new Map(); // lowercase -> display name
   allBaseProducts.forEach(p => {
     if (p.baseVariantName) {
@@ -120,7 +118,7 @@ export default async function ProductsPage({ searchParams }) {
     }
   });
 
-  // Convert Sets to Arrays for passing to Client Component
+  // 7. Chuyển đổi dữ liệu sang mảng để truyền xuống Client Component
   const dynamicSpecsOptions = {};
   for (const [keyLower, data] of specsMap.entries()) {
     dynamicSpecsOptions[data.originalKey] = Array.from(data.valuesMap.values()).sort();
@@ -128,22 +126,22 @@ export default async function ProductsPage({ searchParams }) {
 
   const colorOptions = Array.from(colorMap.values()).sort();
 
-  // Filter products by color if color filter is active
+  // 8. Thực hiện lọc danh sách sản phẩm theo màu sắc nếu có chọn bộ lọc màu
   let filteredProducts = products;
   if (colorFilter.length > 0) {
     const normalizeColor = (c) => (c || '').toLowerCase().trim();
     const filterColors = colorFilter.map(normalizeColor);
     
     filteredProducts = products.filter(p => {
-      // Check baseVariantName
+      // Kiểm tra màu sắc ở sản phẩm gốc
       if (p.baseVariantName && filterColors.includes(normalizeColor(p.baseVariantName))) return true;
-      // Check variant names
+      // Kiểm tra màu sắc ở các biến thể
       if (p.variants?.some(v => filterColors.includes(normalizeColor(v.name)))) return true;
       return false;
     });
   }
 
-  // Fetch wishlisted product ids if user is logged in
+  // 9. Lấy danh sách ID sản phẩm đã yêu thích nếu người dùng đã đăng nhập
   let wishlistedIds = [];
   if (session?.user?.id) {
     try {
@@ -153,11 +151,11 @@ export default async function ProductsPage({ searchParams }) {
       });
       wishlistedIds = userWishlist.map(w => w.productId);
     } catch (e) {
-      console.error("Failed to fetch wishlist:", e);
+      console.error("Lỗi khi lấy danh sách yêu thích:", e);
     }
   }
 
-  // Helper to build URL
+  // 10. Hàm hỗ trợ xây dựng đường dẫn URL mới
   const buildUrl = (key, value) => {
     const params = new URLSearchParams(resolvedSearchParams);
     if (value) {

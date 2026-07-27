@@ -11,8 +11,10 @@ export const metadata = {
 };
 
 export default async function WishlistPage() {
+  // 1. Lấy thông tin phiên đăng nhập của người dùng
   const session = await auth();
 
+  // 2. Nếu chưa đăng nhập -> Hiển thị giao diện yêu cầu đăng nhập
   if (!session?.user?.id) {
     return (
       <div className={styles.page}>
@@ -30,7 +32,7 @@ export default async function WishlistPage() {
     );
   }
 
-  // Fetch wishlisted products
+  // 3. Truy vấn danh sách các sản phẩm mà người dùng này đã bấm Thích từ Database
   const wishlistItems = await prisma.wishlist.findMany({
     where: { userId: session.user.id },
     include: {
@@ -41,7 +43,7 @@ export default async function WishlistPage() {
         }
       }
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' } // Sắp xếp sản phẩm yêu thích mới nhất lên đầu
   });
 
   return (
@@ -54,6 +56,7 @@ export default async function WishlistPage() {
           </p>
         </div>
 
+        {/* 4. Hiển thị thông báo rỗng nếu người dùng chưa thích sản phẩm nào */}
         {wishlistItems.length === 0 ? (
           <div className={styles.emptyContainer}>
             <div className={styles.emptyIcon}>🖤</div>
@@ -63,6 +66,7 @@ export default async function WishlistPage() {
             </Link>
           </div>
         ) : (
+          /* 5. Render danh sách sản phẩm yêu thích dạng lưới Grid */
           <div className={styles.grid}>
             {wishlistItems.map((item) => (
               <ProductCard 
